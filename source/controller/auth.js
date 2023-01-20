@@ -8,13 +8,11 @@ const refToken = process.env.REFRESH_TOKEN_SECRET;
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(email, password);
     const foundUsers = await models.getAllbyEmail({ email });
     const otherUsers = await models.getNotLikeAllUsers({ email });
 
     if (!foundUsers.length) {
       throw { code: 401, message: `Incorrect Email or Password` };
-      // res.redirect('/users/register')
     } else {
       if (await bcrypt.compare(password, foundUsers[0]?.password)) {
         try {
@@ -27,20 +25,20 @@ const login = async (req, res) => {
             accToken,
             { expiresIn: "20s" }
           );
-          const refreshToken = jwt.sign(
-            {
-              id: foundUsers[0]?.users_id,
-              name: foundUsers[0]?.username,
-              iat: new Date().getTime(),
-            },
-            refToken,
-            { expiresIn: "1d" }
-          );
-          await models.updateRefToken({ email: email, refreshToken });
-          res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000,
-          });
+          // const refreshToken = jwt.sign(
+          //   {
+          //     id: foundUsers[0]?.users_id,
+          //     name: foundUsers[0]?.username,
+          //     iat: new Date().getTime(),
+          //   },
+          //   refToken,
+          //   { expiresIn: "1d" }
+          // );
+          // await models.updateRefToken({ email: email, refreshToken });
+          // res.cookie("refreshToken", refreshToken, {
+          //   httpOnly: true,
+          //   maxAge: 24 * 60 * 60 * 1000,
+          // });
 
           res.json({
             message: `Success, User ${foundUsers[0].username} is logged in!`,
@@ -48,6 +46,8 @@ const login = async (req, res) => {
               accessToken,
               profilePicture: foundUsers[0]?.profile_picture,
               username: foundUsers[0]?.username,
+              email: foundUsers[0]?.email,
+              users_id: foundUsers[0]?.users_id,
             },
           });
         } catch (error) {
@@ -60,10 +60,8 @@ const login = async (req, res) => {
       }
     }
   } catch (error) {
-    console.log(error);
     res.status(error?.code ?? 500).json({
       message: error,
-      test: "test",
     });
   }
 };

@@ -36,19 +36,19 @@ const getAllUsersSort = async (params) => {
 
 const getEmail = async (params) => {
   const { email } = params;
-  console.log('test getemail');
+
   return await db`SELECT email FROM users WHERE email = ${email}`;
 };
 
 const getUsername = async (params) => {
   const { username } = params;
-  console.log('test getusername');
+
   return await db`SELECT username FROM users WHERE username = ${username}`;
 };
 
 const getPhoneNumber = async (params) => {
   const { phone_number } = params;
-  console.log('test getphonenumber');
+
   return await db`SELECT phone_number FROM users WHERE phone_number = ${phone_number}`;
 };
 
@@ -58,22 +58,6 @@ const createUsers = async (params) => {
   return await db`INSERT INTO users ("email", "username", "phone_number", "password") VALUES
   (${email}, ${username}, ${phone_number}, ${password})`;
 };
-
-// const createUsers = async (params) => {
-//   const {
-//     email,
-//     phone_number,
-//     username,
-//     password,
-//     profile_picture,
-//     defaultPicture,
-//   } = params
-
-//   return await db`INSERT INTO accounts ("email", "phone_number", "username", "password", "profile_picture") VALUES
-//   (${email}, ${phone_number}, ${username}, ${password}, ${
-//     profile_picture || defaultPicture
-//   })`
-// }
 
 module.exports = {
   getAllUsers,

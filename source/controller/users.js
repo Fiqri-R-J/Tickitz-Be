@@ -98,19 +98,9 @@ const getUsersByEmail = async (req, res) => {
 
 const createUsers = async (req, res) => {
   try {
-    console.log("test1");
     const { email, username, phone_number, password } = req.body;
-    console.log(req);
-    console.log("test1.2");
-    const salt = await bcrypt.genSalt(saltRounds);
-    console.log("test1.3");
-    console.log("test1.3.1");
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    console.log("test1.4");
     const getEmail = await models.getEmail({ email });
-    console.log("test1.5");
     const getUsername = await models.getUsername({ username });
-    console.log("test1.6");
     const getPhoneNumber = await models.getPhoneNumber({ phone_number });
 
     if (
@@ -186,14 +176,29 @@ const createUsers = async (req, res) => {
       };
     }
 
-    console.log("test2");
+    bcrypt.hash(password, saltRounds, async function (err, hash) {
+      try {
+        if (err) {
+          throw "Failed Authenticate, please try again";
+        }
 
-    await models.createUsers({
-      email,
-      username,
-      phone_number,
-      password: hashedPassword,
-      // password,
+        const addData = await models.createUsers({
+          email,
+          phone_number,
+          username,
+          password: hash,
+        });
+
+        res.status(201).json({
+          status: "true",
+          message: "Success Create New Account",
+          data: req.body.email,
+        });
+      } catch (error) {
+        res.status(error?.code ?? 500).json({
+          message: error,
+        });
+      }
     });
 
     res.status(201).json({
@@ -205,194 +210,194 @@ const createUsers = async (req, res) => {
   } catch (error) {
     res.status(error?.code ?? 500).json({
       message: error,
-      test: "bego",
     });
   }
 };
 
-// const createUsers = async (req, res) => {
-//   try {
-//     const { email, phone_number, username, password, profile_picture } =
-//       req.body
-//     const salt = await bcrypt.genSalt(saltRounds)
-//     const hashedPassword = await bcrypt.hash(req.body.password, salt)
+const updateUsersPartial = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, password, profile_picture } = req.body;
 
-//     const getEmail = await models.getEmail({ email })
-//     const getUsername = await models.getUsername({ username })
-//     const getPhoneNumber = await models.getPhoneNumber({ phone_number })
-//     if (
-//       getEmail.length !== 0 &&
-//       getUsername.length !== 0 &&
-//       getPhoneNumber.length !== 0
-//     ) {
-//       throw {
-//         code: 409,
-//         message:
-//           'User with the provided email, username & phoneNumber already exists',
-//       }
-//     }
-//     if (
-//       getEmail.length == 0 &&
-//       getUsername.length !== 0 &&
-//       getPhoneNumber.length !== 0
-//     ) {
-//       throw {
-//         code: 409,
-//         message:
-//           'User with the provided phone number & username already exists',
-//       }
-//     }
-//     if (
-//       getEmail.length !== 0 &&
-//       getUsername.length == 0 &&
-//       getPhoneNumber.length !== 0
-//     ) {
-//       throw {
-//         code: 409,
-//         message: 'User with the provided email & phone number already exists',
-//       }
-//     }
-//     if (
-//       getEmail.length !== 0 &&
-//       getUsername.length !== 0 &&
-//       getPhoneNumber.length == 0
-//     ) {
-//       throw {
-//         code: 409,
-//         message: 'User with the provided email & username already exists',
-//       }
-//     }
-//     if (
-//       getEmail.length !== 0 &&
-//       getUsername.length == 0 &&
-//       getPhoneNumber.length == 0
-//     ) {
-//       throw {
-//         code: 409,
-//         message: 'User with the provided email already exists',
-//       }
-//     }
-//     if (
-//       getEmail.length == 0 &&
-//       getUsername.length !== 0 &&
-//       getPhoneNumber.length == 0
-//     ) {
-//       throw {
-//         code: 409,
-//         message: 'User with the provided username already exists',
-//       }
-//     }
-//     if (
-//       getEmail.length == 0 &&
-//       getUsername.length == 0 &&
-//       getPhoneNumber.length !== 0
-//     ) {
-//       throw {
-//         code: 409,
-//         message: 'User with the provided phone number already exists',
-//       }
-//     }
+    const checkId = id;
+    const roleValidator = req.userId;
 
-//     if (!req.files) {
-//       const addData = await models.createUsers({
-//         email,
-//         phone_number,
-//         username,
-//         password: hashedPassword,
-//         profile_picture,
-//         defaultPicture:
-//           'https://res.cloudinary.com/daouvimjz/image/upload/v1673847179/blank-profile-picture-973460_tjapi1.png',
-//       })
+    if (checkId == roleValidator) {
+      const getAllData = await models.getUsersByID({ id });
 
-//       res.status(201).json({
-//         status: 'true',
-//         message: 'Success Create New Account',
-//         data: req.body.email,
-//       })
-//     } else {
-//       // The name of the input field (i.e. "file") is used to retrieve the uploaded file
-//       let file = req.files.profile_picture
-//       // let fileName = `${uuidv4()}-${file.name}`
-//       // let rootDir = path.dirname(require.main.filename)
-//       // console.log(file)
-//       // let uploadPath = `${rootDir}/images/users/${fileName}`
+      if (!req.files) {
+        if (getAllData.length == 0) {
+          throw { code: 400, message: "ID not identified" };
+        } else {
+          if (password == undefined) {
+            await models.updateUsersPartial({
+              email,
+              defaultValue: getAllData[0],
+              phone_number,
+              username,
+              password,
+              profile_picture,
+              id,
+            });
+          } else {
+            bcrypt.hash(password, saltRounds, async function (err, hash) {
+              try {
+                if (err) {
+                  throw "Failed Authenticate, please try again";
+                  // throw new Error(400)
+                }
+                await models.updateUsersPartial({
+                  email,
+                  defaultValue: getAllData[0],
+                  phone_number,
+                  username,
+                  password: hash,
+                  profile_picture,
+                  id,
+                });
+              } catch (error) {
+                res.status(error?.code ?? 500).json({
+                  message: error.message ?? error,
+                });
+              }
+            });
+          }
 
-//       cloudinary.v2.uploader.upload(
-//         file.tempFilePath,
-//         { public_id: uuidv4() },
-//         function (error, result) {
-//           if (error) {
-//             throw 'Upload failed'
-//           }
+          res.json({
+            status: "true",
+            message: "data updated",
+            data: {
+              id,
+              ...req.body,
+            },
+          });
+        }
+      } else {
+        if (getAllData.length == 0) {
+          throw { code: 400, message: "ID not identified" };
+        } else {
+          if (password == undefined) {
+            let file = req.files.profile_picture;
 
-//           // Use the mv() method to place the file somewhere on your server
-//           // file.mv(uploadPath, async function (err) {
-//           //   if (err) {
-//           //     throw { message: 'Upload failed' }
-//           //   }
+            cloudinary.v2.uploader.destroy(
+              getAllData[0].profile_picture,
+              function (error, result) {
+                console.log(result, error);
+              }
+            );
 
-//           bcrypt.hash(password, saltRounds, async function (err, hash) {
-//             try {
-//               if (err) {
-//                 throw 'Failed Authenticate, please try again'
-//               }
+            cloudinary.v2.uploader.upload(
+              file.tempFilePath,
+              { public_id: uuidv4() },
+              async function (error, result) {
+                if (error) {
+                  // throw 'Upload failed'
+                  throw new Error(400);
+                }
 
-//               const addData = await models.createUsers({
-//                 email,
-//                 phone_number,
-//                 username,
-//                 password: hash,
-//                 // profile_picture: `/static/users/${fileName}`,
-//                 profile_picture: result.public_id,
-//                 defaultPicture:
-//                   'https://res.cloudinary.com/daouvimjz/image/upload/v1671522875/Instagram_default_profile_kynrq6.jpg',
-//               })
+                await models.updateUsersPartial({
+                  email,
+                  defaultValue: getAllData[0],
+                  phone_number,
+                  username,
+                  password,
+                  profile_picture: result.public_id,
+                  id,
+                });
+              }
+            );
+          } else {
+            let file = req.files.profile_picture;
 
-//               res.status(201).json({
-//                 status: 'true',
-//                 message: 'Success Create New Account',
-//                 data: req.body.email,
-//               })
-//             } catch (error) {
-//               res.status(error?.code ?? 500).json({
-//                 message: error,
-//               })
-//             }
-//           })
-//           // })
-//         }
-//       )
-//     }
-//   } catch (error) {
-//     res.status(error?.code ?? 500).json({
-//       message: error,
-//     })
-//   }
-// }
+            cloudinary.v2.uploader.destroy(
+              getAllData[0].profile_picture,
+              function (error, result) {
+                console.log(result, error);
+              }
+            );
 
-module.exports = { getUsersByEmail, createUsers };
+            cloudinary.v2.uploader.upload(
+              file.tempFilePath,
+              { public_id: uuidv4() },
+              async function (error, result) {
+                if (error) {
+                  throw "Upload failed";
+                }
+                bcrypt.hash(password, saltRounds, async function (err, hash) {
+                  try {
+                    if (err) {
+                      throw "Failed Authenticate, please try again";
+                    }
 
-// bcrypt.hash(password, saltRounds, async function (err, hash) {
-//   try {
-//     if (err) {
-//       throw "Failed Authenticate, please try again";
-//     }
+                    await models.updateUsersPartial({
+                      email,
+                      defaultValue: getAllData[0],
+                      phone_number,
+                      username,
+                      password: hash,
+                      profile_picture: result.public_id,
+                      id,
+                    });
+                  } catch (error) {
+                    res.status(500).json({
+                      message: error.message,
+                    });
+                  }
+                });
+              }
+            );
+          }
 
-//     const addData = await models.createUsers({
-//       email,
-//       phone_number,
-//       username,
-//       password: hash,
-//     });
+          res.json({
+            status: "true",
+            message: "data updated",
+            data: {
+              id,
+              ...req.body,
+            },
+            profile_picture: req.files.profile_picture.name,
+          });
+        }
+      }
+    } else {
+      throw { code: 401 };
+    }
+  } catch (error) {
+    if (error.code !== 500) {
+      if (
+        error.message ==
+        'duplicate key value violates unique constraint "users_email_key"'
+      ) {
+        res.status(422).json({
+          message: "User with the provided email already exists",
+        });
+      }
+      if (
+        error.message ==
+        'duplicate key value violates unique constraint "users_username_key"'
+      ) {
+        res.status(422).json({
+          message: "User with the provided username already exists",
+        });
+      }
+      if (
+        error.message ==
+        'duplicate key value violates unique constraint "users_phone_number_key"'
+      ) {
+        res.status(422).json({
+          message: "User with the provided phone number already exists",
+        });
+      } else {
+        res.status(error?.code ?? 500).json({
+          message: error.message ?? error,
+        });
+      }
+    } else {
+      res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+};
 
-//     res.status(201).json({
-//       status: "true",
-//       message: "Success Create New Account",
-//       data: req.body.email,
-//     });
-//   } catch (error) {
-//     res.status(error?.code ?? 500).json({
-//       message: error,
-//     });
-//   }
-// });
+module.exports = { getUsersByEmail, createUsers, updateUsersPartial };

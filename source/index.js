@@ -7,6 +7,11 @@ const PORT = process.env.PORT || 6999;
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const fileUpload = require("express-fileupload");
+const cookieParser = require("cookie-parser");
+
+//koneksi cookie-parser
+app.use(cookieParser());
 
 //koneksi body-parser
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -24,6 +29,14 @@ app.use(helmet());
 
 // koneksi xss
 app.use(xss());
+
+// koneksi express-fileupload
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
 
 // koneksi routes
 app.use("/users", require("./routes/users"));
