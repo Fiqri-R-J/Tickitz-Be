@@ -34,7 +34,7 @@ const getReqAccountByEmail_Redis = async (req, res, next) => {
         });
       }
       if (find_all_users) {
-        console.log("test bawah");
+
         res.json({
           REDIS: true,
           message: "Success get all data users",

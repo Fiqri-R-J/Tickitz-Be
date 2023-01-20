@@ -62,19 +62,28 @@ const createUsers = async (params) => {
 const getUsersByID = async (params) => {
   const { id } = params;
 
-  return await db`SELECT * FROM users WHERE accounts_id = ${id}`;
+  return await db`SELECT * FROM users WHERE users_id = ${id}`;
 };
 
 const updateUsersPartial = async (params) => {
-  const { username, password, profile_picture, defaultValue, id } = params;
+  const {
+    email,
+    phone_number,
+    username,
+    password,
+    profile_picture,
+    defaultValue,
+    id,
+  } = params
 
-  return await db`UPDATE accounts
-  SET email = 
+  return await db`UPDATE users
+  SET email = ${email || defaultValue?.email},
+   phone_number = ${phone_number || defaultValue?.phone_number},
    username = ${username || defaultValue?.username},
-   password = ${password || defaultValue?.password},
+   password =${password || defaultValue?.password},
    profile_picture = ${profile_picture || defaultValue?.profile_picture}
-  WHERE accounts_id = ${id} `;
-};
+  WHERE users_id = ${id} `
+}
 
 module.exports = {
   getAllUsers,
