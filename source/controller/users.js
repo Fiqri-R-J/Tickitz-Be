@@ -103,6 +103,9 @@ const createUsers = async (req, res) => {
     const getUsername = await models.getUsername({ username });
     const getPhoneNumber = await models.getPhoneNumber({ phone_number });
 
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
     if (
       getEmail.length !== 0 &&
       getUsername.length !== 0 &&
@@ -176,30 +179,37 @@ const createUsers = async (req, res) => {
       };
     }
 
-    bcrypt.hash(password, saltRounds, async function (err, hash) {
-      try {
-        if (err) {
-          throw "Failed Authenticate, please try again";
-        }
-
-        const addData = await models.createUsers({
-          email,
-          phone_number,
-          username,
-          password: hash,
-        });
-
-        res.status(201).json({
-          status: "true",
-          message: "Success Create New Account",
-          data: req.body.email,
-        });
-      } catch (error) {
-        res.status(error?.code ?? 500).json({
-          message: error,
-        });
-      }
+    const addData = await models.createUsers({
+      email,
+      phone_number,
+      username,
+      password: hashedPassword,
     });
+
+    // bcrypt.hash(password, saltRounds, async function (err, hash) {
+    //   try {
+    //     if (err) {
+    //       throw "Failed Authenticate, please try again";
+    //     }
+
+    //     const addData = await models.createUsers({
+    //       email,
+    //       phone_number,
+    //       username,
+    //       password: hash,
+    //     });
+
+    //     res.status(201).json({
+    //       status: "true",
+    //       message: "Success Create New Account",
+    //       data: req.body.email,
+    //     });
+    //   } catch (error) {
+    //     res.status(error?.code ?? 500).json({
+    //       message: error,
+    //     });
+    //   }
+    // });
 
     res.status(201).json({
       status: "true",
@@ -219,148 +229,141 @@ const updateUsersPartial = async (req, res) => {
     const { id } = req.params;
     const { username, password, profile_picture } = req.body;
 
-    const checkId = id;
-    const roleValidator = req.userId;
+    const getAllData = await models.getUsersByID({ id });
 
-    if (checkId == roleValidator) {
-      const getAllData = await models.getUsersByID({ id });
-
-      if (!req.files) {
-        if (getAllData.length == 0) {
-          throw { code: 400, message: "ID not identified" };
-        } else {
-          if (password == undefined) {
-            await models.updateUsersPartial({
-              email,
-              defaultValue: getAllData[0],
-              phone_number,
-              username,
-              password,
-              profile_picture,
-              id,
-            });
-          } else {
-            bcrypt.hash(password, saltRounds, async function (err, hash) {
-              try {
-                if (err) {
-                  throw "Failed Authenticate, please try again";
-                  // throw new Error(400)
-                }
-                await models.updateUsersPartial({
-                  email,
-                  defaultValue: getAllData[0],
-                  phone_number,
-                  username,
-                  password: hash,
-                  profile_picture,
-                  id,
-                });
-              } catch (error) {
-                res.status(error?.code ?? 500).json({
-                  message: error.message ?? error,
-                });
-              }
-            });
-          }
-
-          res.json({
-            status: "true",
-            message: "data updated",
-            data: {
-              id,
-              ...req.body,
-            },
-          });
-        }
+    if (!req.files) {
+      if (getAllData.length == 0) {
+        throw { code: 400, message: "ID not identified" };
       } else {
-        if (getAllData.length == 0) {
-          throw { code: 400, message: "ID not identified" };
+        if (password == undefined) {
+          await models.updateUsersPartial({
+            email,
+            defaultValue: getAllData[0],
+            phone_number,
+            username,
+            password,
+            profile_picture,
+            id,
+          });
         } else {
-          if (password == undefined) {
-            let file = req.files.profile_picture;
-
-            cloudinary.v2.uploader.destroy(
-              getAllData[0].profile_picture,
-              function (error, result) {
-                console.log(result, error);
+          bcrypt.hash(password, saltRounds, async function (err, hash) {
+            try {
+              if (err) {
+                throw "Failed Authenticate, please try again";
+                // throw new Error(400)
               }
-            );
-
-            cloudinary.v2.uploader.upload(
-              file.tempFilePath,
-              { public_id: uuidv4() },
-              async function (error, result) {
-                if (error) {
-                  // throw 'Upload failed'
-                  throw new Error(400);
-                }
-
-                await models.updateUsersPartial({
-                  email,
-                  defaultValue: getAllData[0],
-                  phone_number,
-                  username,
-                  password,
-                  profile_picture: result.public_id,
-                  id,
-                });
-              }
-            );
-          } else {
-            let file = req.files.profile_picture;
-
-            cloudinary.v2.uploader.destroy(
-              getAllData[0].profile_picture,
-              function (error, result) {
-                console.log(result, error);
-              }
-            );
-
-            cloudinary.v2.uploader.upload(
-              file.tempFilePath,
-              { public_id: uuidv4() },
-              async function (error, result) {
-                if (error) {
-                  throw "Upload failed";
-                }
-                bcrypt.hash(password, saltRounds, async function (err, hash) {
-                  try {
-                    if (err) {
-                      throw "Failed Authenticate, please try again";
-                    }
-
-                    await models.updateUsersPartial({
-                      email,
-                      defaultValue: getAllData[0],
-                      phone_number,
-                      username,
-                      password: hash,
-                      profile_picture: result.public_id,
-                      id,
-                    });
-                  } catch (error) {
-                    res.status(500).json({
-                      message: error.message,
-                    });
-                  }
-                });
-              }
-            );
-          }
-
-          res.json({
-            status: "true",
-            message: "data updated",
-            data: {
-              id,
-              ...req.body,
-            },
-            profile_picture: req.files.profile_picture.name,
+              await models.updateUsersPartial({
+                email,
+                defaultValue: getAllData[0],
+                phone_number,
+                username,
+                password: hash,
+                profile_picture,
+                id,
+              });
+            } catch (error) {
+              res.status(error?.code ?? 500).json({
+                message: error.message ?? error,
+              });
+            }
           });
         }
+
+        res.json({
+          status: "true",
+          message: "data updated",
+          data: {
+            id,
+            ...req.body,
+          },
+        });
       }
     } else {
-      throw { code: 401 };
+      if (getAllData.length == 0) {
+        throw { code: 400, message: "ID not identified" };
+      } else {
+        if (password == undefined) {
+          let file = req.files.profile_picture;
+
+          cloudinary.v2.uploader.destroy(
+            getAllData[0].profile_picture,
+            function (error, result) {
+              console.log(result, error);
+            }
+          );
+
+          cloudinary.v2.uploader.upload(
+            file.tempFilePath,
+            { public_id: uuidv4() },
+            async function (error, result) {
+              if (error) {
+                // throw 'Upload failed'
+                throw new Error(400);
+              }
+
+              await models.updateUsersPartial({
+                email,
+                defaultValue: getAllData[0],
+                phone_number,
+                username,
+                password,
+                profile_picture: result.public_id,
+                id,
+              });
+            }
+          );
+        } else {
+          let file = req.files.profile_picture;
+
+          cloudinary.v2.uploader.destroy(
+            getAllData[0].profile_picture,
+            function (error, result) {
+              console.log(result, error);
+            }
+          );
+
+          cloudinary.v2.uploader.upload(
+            file.tempFilePath,
+            { public_id: uuidv4() },
+            async function (error, result) {
+              if (error) {
+                throw "Upload failed";
+              }
+              bcrypt.hash(password, saltRounds, async function (err, hash) {
+                try {
+                  if (err) {
+                    throw "Failed Authenticate, please try again";
+                  }
+
+                  await models.updateUsersPartial({
+                    email,
+                    defaultValue: getAllData[0],
+                    phone_number,
+                    username,
+                    password: hash,
+                    profile_picture: result.public_id,
+                    id,
+                  });
+                } catch (error) {
+                  res.status(500).json({
+                    message: error.message,
+                  });
+                }
+              });
+            }
+          );
+        }
+
+        res.json({
+          status: "true",
+          message: "data updated",
+          data: {
+            id,
+            ...req.body,
+          },
+          profile_picture: req.files.profile_picture.name,
+        });
+      }
     }
   } catch (error) {
     if (error.code !== 500) {
