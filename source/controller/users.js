@@ -1,3 +1,4 @@
+const db = require("../config/database");
 const models = require("../models/users");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
@@ -95,4 +96,303 @@ const getUsersByEmail = async (req, res) => {
   }
 };
 
-module.exports = { getUsersByEmail };
+const createUsers = async (req, res) => {
+  try {
+    console.log("test1");
+    const { email, username, phone_number, password } = req.body;
+    console.log(req);
+    console.log("test1.2");
+    const salt = await bcrypt.genSalt(saltRounds);
+    console.log("test1.3");
+    console.log("test1.3.1");
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+    console.log("test1.4");
+    const getEmail = await models.getEmail({ email });
+    console.log("test1.5");
+    const getUsername = await models.getUsername({ username });
+    console.log("test1.6");
+    const getPhoneNumber = await models.getPhoneNumber({ phone_number });
+
+    if (
+      getEmail.length !== 0 &&
+      getUsername.length !== 0 &&
+      getPhoneNumber.length !== 0
+    ) {
+      throw {
+        code: 409,
+        message:
+          "User with the provided email, username & phoneNumber already exists",
+      };
+    }
+    if (
+      getEmail.length == 0 &&
+      getUsername.length !== 0 &&
+      getPhoneNumber.length !== 0
+    ) {
+      throw {
+        code: 409,
+        message:
+          "User with the provided phone number & username already exists",
+      };
+    }
+    if (
+      getEmail.length !== 0 &&
+      getUsername.length == 0 &&
+      getPhoneNumber.length !== 0
+    ) {
+      throw {
+        code: 409,
+        message: "User with the provided email & phone number already exists",
+      };
+    }
+    if (
+      getEmail.length !== 0 &&
+      getUsername.length !== 0 &&
+      getPhoneNumber.length == 0
+    ) {
+      throw {
+        code: 409,
+        message: "User with the provided email & username already exists",
+      };
+    }
+    if (
+      getEmail.length !== 0 &&
+      getUsername.length == 0 &&
+      getPhoneNumber.length == 0
+    ) {
+      throw {
+        code: 409,
+        message: "User with the provided email already exists",
+      };
+    }
+    if (
+      getEmail.length == 0 &&
+      getUsername.length !== 0 &&
+      getPhoneNumber.length == 0
+    ) {
+      throw {
+        code: 409,
+        message: "User with the provided username already exists",
+      };
+    }
+    if (
+      getEmail.length == 0 &&
+      getUsername.length == 0 &&
+      getPhoneNumber.length !== 0
+    ) {
+      throw {
+        code: 409,
+        message: "User with the provided phone number already exists",
+      };
+    }
+
+    console.log("test2");
+
+    await models.createUsers({
+      email,
+      username,
+      phone_number,
+      password: hashedPassword,
+      // password,
+    });
+
+    res.status(201).json({
+      status: "true",
+      code: 201,
+      message: "Success Create New Account",
+      data: req.body.email,
+    });
+  } catch (error) {
+    res.status(error?.code ?? 500).json({
+      message: error,
+      test: "bego",
+    });
+  }
+};
+
+// const createUsers = async (req, res) => {
+//   try {
+//     const { email, phone_number, username, password, profile_picture } =
+//       req.body
+//     const salt = await bcrypt.genSalt(saltRounds)
+//     const hashedPassword = await bcrypt.hash(req.body.password, salt)
+
+//     const getEmail = await models.getEmail({ email })
+//     const getUsername = await models.getUsername({ username })
+//     const getPhoneNumber = await models.getPhoneNumber({ phone_number })
+//     if (
+//       getEmail.length !== 0 &&
+//       getUsername.length !== 0 &&
+//       getPhoneNumber.length !== 0
+//     ) {
+//       throw {
+//         code: 409,
+//         message:
+//           'User with the provided email, username & phoneNumber already exists',
+//       }
+//     }
+//     if (
+//       getEmail.length == 0 &&
+//       getUsername.length !== 0 &&
+//       getPhoneNumber.length !== 0
+//     ) {
+//       throw {
+//         code: 409,
+//         message:
+//           'User with the provided phone number & username already exists',
+//       }
+//     }
+//     if (
+//       getEmail.length !== 0 &&
+//       getUsername.length == 0 &&
+//       getPhoneNumber.length !== 0
+//     ) {
+//       throw {
+//         code: 409,
+//         message: 'User with the provided email & phone number already exists',
+//       }
+//     }
+//     if (
+//       getEmail.length !== 0 &&
+//       getUsername.length !== 0 &&
+//       getPhoneNumber.length == 0
+//     ) {
+//       throw {
+//         code: 409,
+//         message: 'User with the provided email & username already exists',
+//       }
+//     }
+//     if (
+//       getEmail.length !== 0 &&
+//       getUsername.length == 0 &&
+//       getPhoneNumber.length == 0
+//     ) {
+//       throw {
+//         code: 409,
+//         message: 'User with the provided email already exists',
+//       }
+//     }
+//     if (
+//       getEmail.length == 0 &&
+//       getUsername.length !== 0 &&
+//       getPhoneNumber.length == 0
+//     ) {
+//       throw {
+//         code: 409,
+//         message: 'User with the provided username already exists',
+//       }
+//     }
+//     if (
+//       getEmail.length == 0 &&
+//       getUsername.length == 0 &&
+//       getPhoneNumber.length !== 0
+//     ) {
+//       throw {
+//         code: 409,
+//         message: 'User with the provided phone number already exists',
+//       }
+//     }
+
+//     if (!req.files) {
+//       const addData = await models.createUsers({
+//         email,
+//         phone_number,
+//         username,
+//         password: hashedPassword,
+//         profile_picture,
+//         defaultPicture:
+//           'https://res.cloudinary.com/daouvimjz/image/upload/v1673847179/blank-profile-picture-973460_tjapi1.png',
+//       })
+
+//       res.status(201).json({
+//         status: 'true',
+//         message: 'Success Create New Account',
+//         data: req.body.email,
+//       })
+//     } else {
+//       // The name of the input field (i.e. "file") is used to retrieve the uploaded file
+//       let file = req.files.profile_picture
+//       // let fileName = `${uuidv4()}-${file.name}`
+//       // let rootDir = path.dirname(require.main.filename)
+//       // console.log(file)
+//       // let uploadPath = `${rootDir}/images/users/${fileName}`
+
+//       cloudinary.v2.uploader.upload(
+//         file.tempFilePath,
+//         { public_id: uuidv4() },
+//         function (error, result) {
+//           if (error) {
+//             throw 'Upload failed'
+//           }
+
+//           // Use the mv() method to place the file somewhere on your server
+//           // file.mv(uploadPath, async function (err) {
+//           //   if (err) {
+//           //     throw { message: 'Upload failed' }
+//           //   }
+
+//           bcrypt.hash(password, saltRounds, async function (err, hash) {
+//             try {
+//               if (err) {
+//                 throw 'Failed Authenticate, please try again'
+//               }
+
+//               const addData = await models.createUsers({
+//                 email,
+//                 phone_number,
+//                 username,
+//                 password: hash,
+//                 // profile_picture: `/static/users/${fileName}`,
+//                 profile_picture: result.public_id,
+//                 defaultPicture:
+//                   'https://res.cloudinary.com/daouvimjz/image/upload/v1671522875/Instagram_default_profile_kynrq6.jpg',
+//               })
+
+//               res.status(201).json({
+//                 status: 'true',
+//                 message: 'Success Create New Account',
+//                 data: req.body.email,
+//               })
+//             } catch (error) {
+//               res.status(error?.code ?? 500).json({
+//                 message: error,
+//               })
+//             }
+//           })
+//           // })
+//         }
+//       )
+//     }
+//   } catch (error) {
+//     res.status(error?.code ?? 500).json({
+//       message: error,
+//     })
+//   }
+// }
+
+module.exports = { getUsersByEmail, createUsers };
+
+// bcrypt.hash(password, saltRounds, async function (err, hash) {
+//   try {
+//     if (err) {
+//       throw "Failed Authenticate, please try again";
+//     }
+
+//     const addData = await models.createUsers({
+//       email,
+//       phone_number,
+//       username,
+//       password: hash,
+//     });
+
+//     res.status(201).json({
+//       status: "true",
+//       message: "Success Create New Account",
+//       data: req.body.email,
+//     });
+//   } catch (error) {
+//     res.status(error?.code ?? 500).json({
+//       message: error,
+//     });
+//   }
+// });

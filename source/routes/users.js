@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const usersController = require("../controller/users");
-// const middleware = require("../middleware/users");
+const middleware = require("../middleware/users");
 // const authMiddleware = require("../middleware/auth");
 // const uploadMiddleware = require("../middleware/upload");
 const redisMiddleware = require("../middleware/redis");
 
 // CREATE
-// router.post(
-//   "/register",
-//   middleware.createUsersValidator,
-//   usersController.createUsers
-// );
+router.post(
+  "/register",
+  // middleware.createUsersValidator,
+  usersController.createUsers
+);
 
 // READ
 router.get(
