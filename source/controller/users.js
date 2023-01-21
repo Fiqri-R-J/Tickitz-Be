@@ -274,11 +274,10 @@ const updateUsersPartial = async (req, res) => {
 
           cloudinary.v2.uploader.upload(
             file.tempFilePath,
-            { public_id: uuidv4() },
+            { public_id: uuidv4(), folder: "tickitz" },
             async function (error, result) {
               if (error) {
-                // throw 'Upload failed'
-                throw new Error(400);
+                throw error;
               }
 
               await models.updateUsersPartial({
@@ -304,8 +303,7 @@ const updateUsersPartial = async (req, res) => {
 
           cloudinary.v2.uploader.upload(
             file.tempFilePath,
-            { public_id: uuidv4() },
-            { folder: "tickitz" },
+            { public_id: uuidv4(), folder: "tickitz" },
             async function (error, result) {
               if (error) {
                 throw "Upload failed";
@@ -386,200 +384,5 @@ const updateUsersPartial = async (req, res) => {
     }
   }
 };
-
-// const updateUsersPartial = async (req, res) => {
-//   try {
-//     // const salt = await bcrypt.genSalt(saltRounds);
-//     // const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-//     const { id } = req.params;
-//     const { username, password, profile_picture } = req.body;
-
-//     const getAllData = await models.getUsersByID({ id });
-
-//     if (!req.files) {
-//       if (getAllData.length == 0) {
-//         throw { code: 400, message: "ID not identified" };
-//       } else {
-//         console.log("test with no files & no password");
-//         if (password == undefined) {
-//           console.log("UPDATE NO FILES NO PASSWORD");
-//           await models.updateUsersPartial({
-//             defaultValue: getAllData[0],
-//             username,
-//             password,
-//             profile_picture,
-//           });
-//         } else {
-//           bcrypt.hash(password, saltRounds, async function (err, hash) {
-//             try {
-//               if (err) {
-//                 throw "Failed Authenticate, please try again";
-//                 // throw new Error(400)
-//               }
-
-//               await models.updateUsersPartial({
-//                 defaultValue: getAllData[0],
-//                 username,
-//                 password: hash,
-//                 profile_picture,
-//                 id,
-//               });
-//             } catch (error) {
-//               res.status(error?.code ?? 500).json({
-//                 message: error.message ?? error,
-//               });
-//             }
-//           });
-
-//           // await models.updateUsersPartial({
-//           //   defaultValue: getAllData[0],
-//           //   username,
-//           //   password: hashedPassword,
-//           //   profile_picture,
-//           //   id,
-//           // });
-//         }
-
-//         // res.json({
-//         //   status: "true",
-//         //   message: "data updated",
-//         //   data: {
-//         //     id,
-//         //     ...req.body,
-//         //   },
-//         // });
-//       }
-//     } else {
-//       if (getAllData.length == 0) {
-//         throw { code: 400, message: "ID not identified" };
-//       } else {
-//         if (password == undefined) {
-//           console.log("test with files & no password");
-//           let file = req.files.profile_picture;
-
-//           cloudinary.v2.uploader.destroy(
-//             getAllData[0].profile_picture,
-//             function (error, result) {
-//               console.log(result, error);
-//             }
-//           );
-
-//           cloudinary.v2.uploader.upload(
-//             file.tempFilePath,
-//             { public_id: uuidv4() },
-//             async function (error, result) {
-//               if (error) {
-//                 // throw 'Upload failed'
-//                 throw new Error(400);
-//               }
-
-//               await models.updateUsersPartial({
-//                 defaultValue: getAllData[0],
-//                 username,
-//                 password,
-//                 profile_picture: result.public_id,
-//                 id,
-//               });
-//             }
-//           );
-//         } else {
-//           let file = req.files.profile_picture;
-
-//           cloudinary.v2.uploader.destroy(
-//             getAllData[0].profile_picture,
-//             function (error, result) {
-//               console.log(result, error);
-//             }
-//           );
-
-//           cloudinary.v2.uploader.upload(
-//             file.tempFilePath,
-//             { public_id: uuidv4() },
-//             async function (error, result) {
-//               if (error) {
-//                 throw "Upload failed";
-//               }
-//               bcrypt.hash(password, saltRounds, async function (err, hash) {
-//                 try {
-//                   if (err) {
-//                     throw "Failed Authenticate, please try again";
-//                   }
-
-//                   await models.updateUsersPartial({
-//                     defaultValue: getAllData[0],
-//                     username,
-//                     password: hash,
-//                     profile_picture: result.public_id,
-//                     id,
-//                   });
-//                 } catch (error) {
-//                   res.status(500).json({
-//                     message: error.message,
-//                   });
-//                 }
-//               });
-
-//               // await models.updateUsersPartial({
-//               //   defaultValue: getAllData[0],
-//               //   username,
-//               //   password: hashedPassword,
-//               //   profile_picture: result.public_id,
-//               //   id,
-//               // });
-//             }
-//           );
-//         }
-
-//         res.json({
-//           status: "true",
-//           message: "data updated",
-//           data: {
-//             id,
-//             ...req.body,
-//           },
-//           profile_picture: req.files.profile_picture.name,
-//         });
-//       }
-//     }
-//   } catch (error) {
-//     console.log("error bossku");
-//     console.log(error);
-//     if (error.code !== 500) {
-//       if (
-//         error.message ==
-//         'duplicate key value violates unique constraint "users_email_key"'
-//       ) {
-//         res.status(422).json({
-//           message: "User with the provided email already exists",
-//         });
-//       }
-//       if (
-//         error.message ==
-//         'duplicate key value violates unique constraint "users_username_key"'
-//       ) {
-//         res.status(422).json({
-//           message: "User with the provided username already exists",
-//         });
-//       }
-//       if (
-//         error.message ==
-//         'duplicate key value violates unique constraint "users_phone_number_key"'
-//       ) {
-//         res.status(422).json({
-//           message: "User with the provided phone number already exists",
-//         });
-//       } else {
-//         res.status(error?.code ?? 500).json({
-//           message: error.message ?? error,
-//         });
-//       }
-//     } else {
-//       res.status(500).json({
-//         message: error.message,
-//       });
-//     }
-//   }
-// };
 
 module.exports = { getUsersByEmail, createUsers, updateUsersPartial };

@@ -81,9 +81,11 @@ const updateUsersPartial = async (params) => {
    phone_number = ${phone_number || defaultValue?.phone_number},
    username = ${username || defaultValue?.username},
    password =${password || defaultValue?.password},
-   profile_picture = ${profile_picture || defaultValue?.profile_picture}
+   profile_picture = ${profile_picture || defaultValue?.profile_picture},
+   updated_at = NOW() AT TIME ZONE 'Asia/Jakarta' 
   WHERE users_id = ${id} `
 }
+
 
 module.exports = {
   getAllUsers,
