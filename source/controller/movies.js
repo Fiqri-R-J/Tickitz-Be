@@ -165,4 +165,130 @@ const addMovies = async (req, res) => {
   }
 };
 
-module.exports = { getMoviesbyTitle, addMovies };
+const updateMoviesPartial = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      users_id,
+      movie_name,
+      category,
+      director,
+      casts,
+      release_date,
+      synopsis,
+      movie_picture,
+      duration,
+      duration_hour,
+      duration_mins,
+    } = req.body;
+
+    const getHour = duration.split(":")[0];
+    const getMins = duration.split(":")[1];
+    // const checkId = id
+    // const roleValidator = req.userId
+
+    // if (checkId == roleValidator) {
+    const getAllData = await models.getMoviesByID({ id });
+
+    if (!req.files) {
+      if (getAllData.length == 0) {
+        throw { code: 400, message: "movies_id not identified" };
+      } else {
+        await models.updateMoviesPartial({
+          movie_name,
+          defaultValue: getAllData[0],
+          category,
+          director,
+          casts,
+          release_date,
+          synopsis,
+          duration,
+          duration_hour: getHour,
+          duration_mins: getMins,
+          id,
+        });
+
+        res.json({
+          status: "true",
+          message: "data updated",
+          data: {
+            id,
+            ...req.body,
+          },
+        });
+      }
+    } else {
+      if (getAllData.length == 0) {
+        throw { code: 400, message: "movies_id not identified" };
+      } else {
+        let file = req.files.movie_picture;
+
+        cloudinary.v2.uploader.destroy(
+          getAllData[0].movie_picture,
+          function (error, result) {
+            console.log(result, error);
+          }
+        );
+
+        cloudinary.v2.uploader.upload(
+          file.tempFilePath,
+          { public_id: uuidv4(), folder: "tickitz" },
+          async function (error, result) {
+            if (error) {
+              throw error;
+            }
+
+            await models.updateMoviesPartial({
+              movie_name,
+              defaultValue: getAllData[0],
+              category,
+              director,
+              casts,
+              release_date,
+              synopsis,
+              movie_picture: result.public_id,
+              duration,
+              duration_hour: getHour,
+              duration_mins: getMins,
+              id,
+            });
+          }
+        );
+
+        res.json({
+          status: "true",
+          message: "data updated",
+          data: {
+            id,
+            ...req.body,
+          },
+          profile_picture: req.files.movie_picture.name,
+        });
+      }
+    }
+    // } else {
+    //   throw { code: 401 }
+    // }
+  } catch (error) {
+    if (error.code !== 500) {
+      if (
+        error.message ==
+        'duplicate key value violates unique constraint "movies_movie_name_key"'
+      ) {
+        res.status(422).json({
+          message: "Movie with the provided movie_name already exists",
+        });
+      } else {
+        res.status(error?.code ?? 500).json({
+          message: error.message ?? error,
+        });
+      }
+    } else {
+      res.status(500).json({
+        message: error.message,
+      });
+    }
+  }
+};
+
+module.exports = { getMoviesbyTitle, addMovies, updateMoviesPartial };

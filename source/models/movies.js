@@ -61,6 +61,43 @@ const getAllMoviesSort = async (params) => {
   } `;
 };
 
+const getMoviesByID = async (params) => {
+  const { id } = params;
+
+  return await db`SELECT * FROM movies WHERE movies_id = ${id}`;
+};
+
+const updateMoviesPartial = async (params) => {
+  const {
+    movie_name,
+    category,
+    director,
+    casts,
+    release_date,
+    synopsis,
+    movie_picture,
+    duration,
+    duration_hour,
+    duration_mins,
+    defaultValue,
+    id,
+  } = params;
+
+  return await db`UPDATE movies
+  SET movie_name = ${movie_name || defaultValue?.movie_name},
+  category = ${category || defaultValue?.category},
+   director = ${director || defaultValue?.director},
+   casts =${casts || defaultValue?.casts},
+   release_date = ${release_date || defaultValue?.release_date},
+   synopsis = ${synopsis || defaultValue?.synopsis},
+   movie_picture = ${movie_picture || defaultValue?.movie_picture},
+   duration = ${duration || defaultValue?.duration},
+   duration_hour = ${duration_hour || defaultValue?.duration_hour},
+   duration_mins = ${duration_mins || defaultValue?.duration_mins},
+   updated_at = NOW() AT TIME ZONE 'Asia/Jakarta' 
+  WHERE movies_id = ${id} `;
+};
+
 module.exports = {
   addMovies,
   getMoviesName,
@@ -69,4 +106,6 @@ module.exports = {
   getAllMoviesPaginationSort,
   getAllMoviesPagination,
   getAllMoviesSort,
+  getMoviesByID,
+  updateMoviesPartial,
 };

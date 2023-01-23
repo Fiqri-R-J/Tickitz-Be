@@ -17,6 +17,7 @@ router.post(
     ".JPG",
     ".JPEG",
   ]),
+  uploadMiddleware.fileSizeLimiter,
   middleware.createMoviesValidator,
   moviesController.addMovies
 );
@@ -28,5 +29,23 @@ router.get(
   redisMiddleware.getReqMoviesByTitle_Redis,
   moviesController.getMoviesbyTitle
 );
+
+// UPDATE
+router.patch(
+  '/edit/:id',
+  // authMiddleware.validateToken,
+  // authMiddleware.validateRole,
+  uploadMiddleware.fileExtLimiter([
+    '.png',
+    '.jpg',
+    '.jpeg',
+    '.PNG',
+    '.JPG',
+    '.JPEG',
+  ]),
+  uploadMiddleware.fileSizeLimiter,
+  middleware.updateMoviesPartialValidator,
+  moviesController.updateMoviesPartial
+)
 
 module.exports = router;

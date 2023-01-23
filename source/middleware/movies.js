@@ -55,27 +55,29 @@ const createMoviesValidator = (req, res, next) => {
 };
 
 const updateMoviesPartialValidator = (req, res, next) => {
-  const { email, phone_number, username, password, profile_picture } = req.body;
+  const {
+    movie_name,
+    category,
+    director,
+    casts,
+    release_date,
+    synopsis,
+    movie_picture,
+    duration,
+  } = req.body;
 
-  extend("namePassswordValidator", () => {
-    if (req.body.username !== req.body.password) {
-      return true;
-    }
-    return false;
-  });
-
-  extend("regexUsername", () => {
-    if (/^[a-zA-Z0-9\s+]+$/g.test(req.body.username)) {
+  extend("regexDuration", () => {
+    if (/^([0-9]+:)+[0-9]+$/.test(req.body.duration)) {
       return true;
     } else {
       return false;
     }
   });
 
-  extend("regexPass", () => {
+  extend("regexReleaseDate", () => {
     if (
-      /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/.test(
-        req.body.password
+      /^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/.test(
+        req.body.release_date
       )
     ) {
       return true;
@@ -85,29 +87,30 @@ const updateMoviesPartialValidator = (req, res, next) => {
   });
 
   addCustomMessages({
-    "username.namePassswordValidator": `Password can't contain username`,
-    "password.regexUsername": `Username can only contain Alphanumeric Characters`,
-    "password.regexPass": `Passwords must have at least 8 characters and contain uppercase letters, lowercase letters, numbers, and symbols`,
+    "duration.regexDuration": `Delimiter between hours to minutes, must be a colon (:)`,
+    "movie_picture.required": `Missing files`,
+    "release_date.regexReleaseDate": `Using ISO format (yyyy-mm-dd) is a mandatory`,
   });
 
   const rules = new Validator(req.body, {
-    email:
-      email == ""
-        ? "required|email|minLength:3|maxLength:100"
-        : "email|minLength:3|maxLength:100",
-    phone_number:
-      phone_number == ""
-        ? "required|phoneNumber|minLength:7|maxLength:14"
-        : "phoneNumber|minLength:7|maxLength:12",
-    username:
-      username == ""
-        ? "required|minLength:5|maxLength:25|regexUsername|namePassswordValidator"
-        : "minLength:5|maxLength:25|regexUsername|namePassswordValidator",
-    password:
-      password == ""
-        ? "required|regexPass|minLength:8|maxLength:20"
-        : "regexPass|minLength:8|maxLength:20",
-    profile_picture: profile_picture == "" ? "required|url" : "url",
+    movie_name: movie_name
+      ? "required|minLength:1|maxLength:50"
+      : "minLength:1|maxLength:50",
+    category: category
+      ? "required|minLength:1|maxLength:100"
+      : "minLength:1|maxLength:100",
+    director: director
+      ? "required|minLength:1|maxLength:100"
+      : "minLength:1|maxLength:100",
+    casts: casts
+      ? "required|minLength:1|maxLength:100"
+      : "minLength:1|maxLength:100",
+    release_date: release_date
+      ? "required|regexReleaseDate"
+      : "regexReleaseDate",
+    synopsis: synopsis ? "required" : "minLength:1",
+    movie_picture: req.body.movie_picture == "" ? "required|url" : "url",
+    duration: duration ? "required|regexDuration" : "regexDuration",
   });
 
   rules.check().then((matched) => {
