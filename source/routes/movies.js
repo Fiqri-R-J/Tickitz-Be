@@ -9,14 +9,14 @@ const redisMiddleware = require("../middleware/redis");
 // CREATE
 router.post(
   "/add-movies",
-  // uploadMiddleware.fileExtLimiter([
-  //   ".png",
-  //   ".jpg",
-  //   ".jpeg",
-  //   ".PNG",
-  //   ".JPG",
-  //   ".JPEG",
-  // ]),
+  uploadMiddleware.fileExtLimiter([
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".PNG",
+    ".JPG",
+    ".JPEG",
+  ]),
   middleware.createMoviesValidator,
   moviesController.addMovies
 );
@@ -25,7 +25,7 @@ router.post(
 router.get(
   "/:title?",
   // authMiddleware.validateToken,
-  // redisMiddleware.getReqAccountByEmail_Redis,
+  redisMiddleware.getReqMoviesByTitle_Redis,
   moviesController.getMoviesbyTitle
 );
 
