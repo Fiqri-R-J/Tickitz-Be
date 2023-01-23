@@ -189,7 +189,7 @@ const createUsers = async (req, res) => {
     res.status(201).json({
       status: "true",
       code: 201,
-      message: "Success Create New Account",
+      message: "Success Add new Movies",
       data: req.body.email,
     });
   } catch (error) {

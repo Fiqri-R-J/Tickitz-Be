@@ -41,6 +41,7 @@ app.use(
 // koneksi routes
 app.use("/users", require("./routes/users"));
 // app.use("/users/recipes", require("./routes/recipes"));
+app.use("/movies", require("./routes/movies"));
 app.use("/auth", require("./routes/auth"));
 
 app.get("/", (req, res) => {
