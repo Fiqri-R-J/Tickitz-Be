@@ -13,9 +13,22 @@ const createMoviesValidator = (req, res, next) => {
     }
   });
 
+  extend("regexReleaseDate", () => {
+    if (
+      /^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/.test(
+        req.body.release_date
+      )
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+
   addCustomMessages({
     "duration.regexDuration": `Delimiter between hours to minutes, must be a colon (:)`,
     "movie_picture.required": `Missing files`,
+    "release_date.regexReleaseDate": `Using ISO format (yyyy-mm-dd) is a mandatory`,
   });
 
   const rules = new Validator(req.body, {
@@ -24,7 +37,7 @@ const createMoviesValidator = (req, res, next) => {
     category: "required|minLength:1|maxLength:100",
     director: "required|minLength:1|maxLength:100",
     casts: "required|minLength:1|maxLength:100",
-    release_date: "required",
+    release_date: "required|regexReleaseDate",
     synopsis: "required",
     movie_picture: req.body.movie_picture == "" ? "required|url" : "url",
     duration: "required|regexDuration",

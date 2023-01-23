@@ -34,7 +34,6 @@ const getReqAccountByEmail_Redis = async (req, res, next) => {
         });
       }
       if (find_all_users) {
-
         res.json({
           REDIS: true,
           message: "Success get all data users",
@@ -80,7 +79,12 @@ const getReqAccountByEmail_Redis = async (req, res, next) => {
   }
 };
 
+const getReqMoviesByTitle_Redis = async (req, res, next) => {
+
+};
+
 module.exports = {
   connectRedis,
   getReqAccountByEmail_Redis,
+  getReqMoviesByTitle_Redis,
 };

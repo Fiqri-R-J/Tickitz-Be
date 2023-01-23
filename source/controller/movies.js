@@ -4,9 +4,94 @@ const { v4: uuidv4 } = require("uuid");
 const { connectRedis } = require("../middleware/redis");
 const { cloudinary } = require("../middleware/upload");
 
-const getMoviesbyName = async (req, res) => {
+const getMoviesbyTitle = async (req, res) => {
   try {
-  } catch (error) {}
+    const { title } = req.params;
+    const { page, limit, sort } = req.query;
+
+    const totalDatas = await models.getAllMovies();
+
+    let getMoviesData;
+    let getAllData;
+
+    if (title) {
+      getMoviesData = await models.getMoviesByTitle({ title });
+      // connectRedis.set("find_users", true, "ex", 10);
+      // connectRedis.set("url", req.originalUrl, "ex", 10);
+      // connectRedis.set("email_users", email, "ex", 10);
+      // connectRedis.set("getReqAccount", JSON.stringify(getMoviesData), "ex", 10);
+      if (getMoviesData.length > 0) {
+        res.json({
+          message: `Get Movies With title: ${title}`,
+          code: 200,
+          data: getMoviesData,
+        });
+      } else {
+        throw { code: 422, message: "Data not found" };
+      }
+    }
+    if (!title && !page && !limit && !sort) {
+      getMoviesData = totalDatas;
+      // connectRedis.set("url", req.originalUrl, "ex", 10);
+      // connectRedis.set("find_all_users", true, "ex", 10);
+      // connectRedis.set("getReqAccount", JSON.stringify(getMoviesData), "ex", 10);
+      res.json({
+        message: "Success get all data users",
+        code: 200,
+        total: getMoviesData.length,
+        data: getMoviesData,
+      });
+    }
+    if (page || limit || sort) {
+      if (page && limit && sort) {
+        getAllData = await models.getAllMoviesPaginationSort({
+          sort,
+          limit,
+          page,
+        });
+      } else if (page && limit) {
+        getAllData = await models.getAllMoviesPagination({ limit, page });
+        // connectRedis.set("url", req.originalUrl, "ex", 10);
+        // connectRedis.set("page", page, "ex", 10);
+        // connectRedis.set("limit", limit, "ex", 10);
+        // connectRedis.set("dataPerPage", JSON.stringify(getAllData), "ex", 10);
+        // connectRedis.set("getReqAccPagi", JSON.stringify(totalDatas), "ex", 10);
+        // connectRedis.set("isPaginated", true, "ex", 10);
+      } else if (sort) {
+        getAllData = await models.getAllMoviesSort({ sort });
+        // connectRedis.set("url", req.originalUrl, "ex", 10);
+        // connectRedis.set("isSorted", true, "ex", 10);
+        // connectRedis.set("sortedData", JSON.stringify(getAllData), "ex", 10);
+        res.json({
+          message: "Success get all movies",
+          total: getAllData.length,
+          data: getAllData,
+        });
+      }
+    }
+
+    if ((page && limit && sort) || (page && limit)) {
+      // connectRedis.set("url", req.originalUrl, "ex", 10);
+      // connectRedis.set("page", page, "ex", 10);
+      // connectRedis.set("limit", limit, "ex", 10);
+      // connectRedis.set("dataPerPage", JSON.stringify(getAllData), "ex", 10);
+      // connectRedis.set("getReqAccPagi", JSON.stringify(totalDatas), "ex", 10);
+      // connectRedis.set("isPaginated", true, "ex", 10);
+      res.json({
+        message: "success get movies",
+        code: 200,
+        total: totalDatas.length,
+        dataPerPage: getAllData.length,
+        page: `${page} from ${Math.ceil(totalDatas.length / limit)}`,
+        data: getAllData,
+      });
+    }
+  } catch (error) {
+    res.status(error?.code ?? 500).json({
+      serverMessage: error,
+      data: [],
+    });
+  }
 };
 
 const addMovies = async (req, res) => {
@@ -80,4 +165,4 @@ const addMovies = async (req, res) => {
   }
 };
 
-module.exports = { getMoviesbyName, addMovies };
+module.exports = { getMoviesbyTitle, addMovies };
