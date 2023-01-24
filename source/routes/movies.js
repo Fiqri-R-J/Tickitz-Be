@@ -22,12 +22,20 @@ router.post(
   moviesController.addMovies
 );
 
-// READ
+// READ - SORT BY CREATED_AT
 router.get(
-  "/:title?",
+  "/search/:title?",
   // authMiddleware.validateToken,
   redisMiddleware.getReqMoviesByTitle_Redis,
   moviesController.getMoviesbyTitle
+);
+
+// READ - SORT BY RELEASE_DATE
+router.get(
+  "/search-2/:title?",
+  // authMiddleware.validateToken,
+  redisMiddleware.getReqMoviesByTitle_Redis,
+  moviesController.getMoviesbyTitle2
 );
 
 // UPDATE

@@ -32,9 +32,7 @@ const getAllMovies = async () => {
 const getMoviesByTitle = async (params) => {
   const { title } = params;
 
-  return await db`SELECT * FROM movies WHERE movie_name LIKE ${
-    "%" + title + "%"
-  }`;
+  return await db`SELECT * FROM movies WHERE movie_name LIKE '%' || ${title} || '%'`;
 };
 
 const getAllMoviesPaginationSort = async (params) => {
@@ -42,6 +40,14 @@ const getAllMoviesPaginationSort = async (params) => {
 
   return await db`SELECT * FROM movies ${
     sort ? db`ORDER BY created_at DESC` : db`ORDER BY created_at ASC`
+  } LIMIT ${limit} OFFSET ${limit * (page - 1)}`;
+};
+
+const getAllMoviesPaginationSort2 = async (params) => {
+  const { limit, page, sort } = params;
+
+  return await db`SELECT * FROM movies ${
+    sort ? db`ORDER BY release_date DESC` : db`ORDER BY release_date ASC`
   } LIMIT ${limit} OFFSET ${limit * (page - 1)}`;
 };
 
@@ -53,11 +59,27 @@ const getAllMoviesPagination = async (params) => {
   }`;
 };
 
+const getAllMoviesPagination2 = async (params) => {
+  const { limit, page } = params;
+
+  return await db`SELECT * FROM movies ORDER BY release_date ASC LIMIT ${limit} OFFSET ${
+    limit * (page - 1)
+  }`;
+};
+
 const getAllMoviesSort = async (params) => {
   const { sort } = params;
 
   return await db`SELECT * FROM movies ${
     sort ? db`ORDER BY created_at DESC` : db`ORDER BY created_at ASC`
+  } `;
+};
+
+const getAllMoviesSort2 = async (params) => {
+  const { sort } = params;
+
+  return await db`SELECT * FROM movies ${
+    sort ? db`ORDER BY release_date DESC` : db`ORDER BY release_date ASC`
   } `;
 };
 
@@ -115,4 +137,7 @@ module.exports = {
   getMoviesByID,
   updateMoviesPartial,
   deleteMovies,
+  getAllMoviesPaginationSort2,
+  getAllMoviesPagination2,
+  getAllMoviesSort2,
 };
