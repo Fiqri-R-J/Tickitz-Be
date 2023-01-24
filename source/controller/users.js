@@ -189,7 +189,7 @@ const createUsers = async (req, res) => {
     res.status(201).json({
       status: "true",
       code: 201,
-      message: "Success Create New Account",
+      message: "Success Add new Movies",
       data: req.body.email,
     });
   } catch (error) {
@@ -205,16 +205,17 @@ const updateUsersPartial = async (req, res) => {
     const { email, phone_number, username, password, profile_picture } =
       req.body;
 
-    // const checkId = id
-    // const roleValidator = req.userId
+    const roleValidator = req.users_id || null; // middleware for roleValidator
+    const getRole = await models.getRoles({ roleValidator });
+    const isAdmin = getRole[0]?.role;
 
-    // if (checkId == roleValidator) {
     const getAllData = await models.getUsersByID({ id });
+    if (getAllData.length == 0) {
+      throw { code: 400, message: "ID not identified" };
+    }
 
-    if (!req.files) {
-      if (getAllData.length == 0) {
-        throw { code: 400, message: "ID not identified" };
-      } else {
+    if ((isAdmin == "ADMIN" && roleValidator == "1") || roleValidator == id) {
+      if (!req.files) {
         if (password == undefined) {
           await models.updateUsersPartial({
             email,
@@ -257,96 +258,99 @@ const updateUsersPartial = async (req, res) => {
             ...req.body,
           },
         });
+      } else {
+        if (getAllData.length == 0) {
+          throw { code: 400, message: "ID not identified" };
+        } else {
+          if (password == undefined) {
+            let file = req.files.profile_picture;
+
+            cloudinary.v2.uploader.destroy(
+              getAllData[0].profile_picture,
+              function (error, result) {
+                console.log(result, error);
+              }
+            );
+
+            cloudinary.v2.uploader.upload(
+              file.tempFilePath,
+              { public_id: uuidv4(), folder: "tickitz" },
+              async function (error, result) {
+                if (error) {
+                  throw error;
+                }
+
+                await models.updateUsersPartial({
+                  email,
+                  defaultValue: getAllData[0],
+                  phone_number,
+                  username,
+                  password,
+                  profile_picture: result.public_id,
+                  id,
+                });
+              }
+            );
+          } else {
+            let file = req.files.profile_picture;
+
+            cloudinary.v2.uploader.destroy(
+              getAllData[0].profile_picture,
+              function (error, result) {
+                console.log(result, error);
+              }
+            );
+
+            cloudinary.v2.uploader.upload(
+              file.tempFilePath,
+              { public_id: uuidv4(), folder: "tickitz" },
+              async function (error, result) {
+                if (error) {
+                  throw "Upload failed";
+                }
+                bcrypt.hash(password, saltRounds, async function (err, hash) {
+                  try {
+                    if (err) {
+                      throw "Failed Authenticate, please try again";
+                    }
+
+                    await models.updateUsersPartial({
+                      email,
+                      defaultValue: getAllData[0],
+                      phone_number,
+                      username,
+                      password: hash,
+                      profile_picture: result.public_id,
+                      id,
+                    });
+                  } catch (error) {
+                    res.status(500).json({
+                      message: error.message,
+                    });
+                  }
+                });
+              }
+            );
+          }
+
+          res.json({
+            status: "true",
+            message: "data updated",
+            data: {
+              id,
+              ...req.body,
+            },
+            profile_picture: req.files.profile_picture.name,
+          });
+        }
       }
     } else {
-      if (getAllData.length == 0) {
-        throw { code: 400, message: "ID not identified" };
-      } else {
-        if (password == undefined) {
-          let file = req.files.profile_picture;
-
-          cloudinary.v2.uploader.destroy(
-            getAllData[0].profile_picture,
-            function (error, result) {
-              console.log(result, error);
-            }
-          );
-
-          cloudinary.v2.uploader.upload(
-            file.tempFilePath,
-            { public_id: uuidv4(), folder: "tickitz" },
-            async function (error, result) {
-              if (error) {
-                throw error;
-              }
-
-              await models.updateUsersPartial({
-                email,
-                defaultValue: getAllData[0],
-                phone_number,
-                username,
-                password,
-                profile_picture: result.public_id,
-                id,
-              });
-            }
-          );
-        } else {
-          let file = req.files.profile_picture;
-
-          cloudinary.v2.uploader.destroy(
-            getAllData[0].profile_picture,
-            function (error, result) {
-              console.log(result, error);
-            }
-          );
-
-          cloudinary.v2.uploader.upload(
-            file.tempFilePath,
-            { public_id: uuidv4(), folder: "tickitz" },
-            async function (error, result) {
-              if (error) {
-                throw "Upload failed";
-              }
-              bcrypt.hash(password, saltRounds, async function (err, hash) {
-                try {
-                  if (err) {
-                    throw "Failed Authenticate, please try again";
-                  }
-
-                  await models.updateUsersPartial({
-                    email,
-                    defaultValue: getAllData[0],
-                    phone_number,
-                    username,
-                    password: hash,
-                    profile_picture: result.public_id,
-                    id,
-                  });
-                } catch (error) {
-                  res.status(500).json({
-                    message: error.message,
-                  });
-                }
-              });
-            }
-          );
-        }
-
-        res.json({
-          status: "true",
-          message: "data updated",
-          data: {
-            id,
-            ...req.body,
-          },
-          profile_picture: req.files.profile_picture.name,
-        });
-      }
+      throw {
+        code: 401,
+        message:
+          "Access not granted, only admin & valid user can access this section!",
+      };
     }
-    // } else {
-    //   throw { code: 401 }
-    // }
   } catch (error) {
     if (error.code !== 500) {
       if (
@@ -385,4 +389,42 @@ const updateUsersPartial = async (req, res) => {
   }
 };
 
-module.exports = { getUsersByEmail, createUsers, updateUsersPartial };
+const deleteUsers = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const getAllData = await models.getUsersByID({ id });
+
+    if (getAllData.length == 0) {
+      throw { code: 400, message: "users_id not identified" };
+    }
+
+    const roleValidator = req.users_id || null; // middleware for roleValidator
+    const getRole = await models.getRoles({ roleValidator });
+    const isAdmin = getRole[0]?.role;
+
+    if ((isAdmin == "ADMIN" && roleValidator == "1") || roleValidator == id) {
+      await models.deleteUsers({ id });
+      res.json({
+        status: "true",
+        message: "USER DELETED!",
+      });
+    } else {
+      throw {
+        code: 401,
+        message:
+          "Access not granted, only admin & valid user can access this section!",
+      };
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+module.exports = {
+  getUsersByEmail,
+  createUsers,
+  updateUsersPartial,
+  deleteUsers,
+};

@@ -23,7 +23,7 @@ const login = async (req, res) => {
               iat: new Date().getTime(),
             },
             accToken,
-            { expiresIn: "20s" }
+            { expiresIn: "2000s" }
           );
           // const refreshToken = jwt.sign(
           //   {

@@ -40,8 +40,9 @@ app.use(
 
 // koneksi routes
 app.use("/users", require("./routes/users"));
-// app.use("/users/recipes", require("./routes/recipes"));
+app.use("/movies", require("./routes/movies"));
 app.use("/auth", require("./routes/auth"));
+app.use("/schedules", require("./routes/schedules"));
 
 app.get("/", (req, res) => {
   res.json({

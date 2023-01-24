@@ -24,9 +24,11 @@ const loginValidator = (req, res, next) => {
 
 const validateToken = (req, res, next) => {
   try {
+    // console.log(req.headers);
     const authHeaders = req.headers["authorization"];
     const token = authHeaders && authHeaders.split(" ")[1];
     // const { authorization } = req.headers
+    // console.log(authHeaders);
 
     if (authHeaders) {
       jwt.verify(token, accToken, (err, decoded) => {
@@ -61,7 +63,7 @@ const validateRole = (req, res, next) => {
         if (err) throw { code: 401 };
         else {
           // return decoded.id
-          req.userId = decoded.id;
+          req.users_id = decoded.id;
           next();
         }
       });

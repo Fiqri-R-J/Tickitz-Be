@@ -74,7 +74,7 @@ const updateUsersPartial = async (params) => {
     profile_picture,
     defaultValue,
     id,
-  } = params
+  } = params;
 
   return await db`UPDATE users
   SET email = ${email || defaultValue?.email},
@@ -83,9 +83,20 @@ const updateUsersPartial = async (params) => {
    password =${password || defaultValue?.password},
    profile_picture = ${profile_picture || defaultValue?.profile_picture},
    updated_at = NOW() AT TIME ZONE 'Asia/Jakarta' 
-  WHERE users_id = ${id} `
-}
+  WHERE users_id = ${id} `;
+};
 
+const deleteUsers = async (params) => {
+  const { id } = params;
+
+  return await db`DELETE FROM users WHERE users_id = ${id}`;
+};
+
+const getRoles = async (params) => {
+  const { roleValidator } = params;
+
+  return await db`SELECT role from users WHERE users_id = ${roleValidator}`;
+};
 
 module.exports = {
   getAllUsers,
@@ -99,4 +110,6 @@ module.exports = {
   createUsers,
   getUsersByID,
   updateUsersPartial,
+  deleteUsers,
+  getRoles,
 };
