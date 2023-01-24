@@ -19,9 +19,12 @@ const addSchedules = async (req, res) => {
     const getRole = await models.getRoles({ roleValidator });
     const isAdmin = getRole[0]?.role;
 
+    console.log(roleValidator);
+
     if (isAdmin == "ADMIN" && roleValidator == "1") {
+      console.log(isAdmin);
       await models.addSchedules({
-        users_id: roleValidator,
+        users_id,
         movies_id,
         time,
         location,

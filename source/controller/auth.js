@@ -48,6 +48,7 @@ const login = async (req, res) => {
               username: foundUsers[0]?.username,
               email: foundUsers[0]?.email,
               users_id: foundUsers[0]?.users_id,
+              phoneNumber: foundUsers[0]?.phone_number,
             },
           });
         } catch (error) {
