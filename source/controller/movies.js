@@ -203,54 +203,59 @@ const addMovies = async (req, res) => {
     const getHour = duration.split(":")[0];
     const getMins = duration.split(":")[1];
 
-    if (users_id !== "1") {
+    const roleValidator = req.users_id || null; // middleware for roleValidator
+    const getRole = await models.getRoles({ roleValidator });
+    const isAdmin = getRole[0]?.role;
+
+    if (isAdmin == "ADMIN" && roleValidator == "1") {
+      if (getMoviesName.length !== 0) {
+        throw {
+          code: 409,
+          message: "Movies name already exists",
+        };
+      }
+
+      let file = req.files.movie_picture;
+
+      cloudinary.v2.uploader.upload(
+        file.tempFilePath,
+        { public_id: uuidv4(), folder: "tickitz" },
+        async function (error, result) {
+          if (error) {
+            throw error;
+          }
+
+          await models.addMovies({
+            users_id,
+            movie_name,
+            category,
+            director,
+            casts,
+            release_date,
+            synopsis,
+            movie_picture: result.public_id,
+            duration,
+            duration_hour: getHour,
+            duration_mins: getMins,
+          });
+        }
+      );
+
+      res.status(201).json({
+        status: "true",
+        code: 201,
+        message: "Success add new movie",
+        data: { ...req.body },
+      });
+    } else {
       throw {
         code: 401,
-        message: "Access not granted!, only Admin can access this section",
+        message: "Access not granted, only admin can access this section!",
       };
     }
-    if (getMoviesName.length !== 0) {
-      throw {
-        code: 409,
-        message: "Movies name already exists",
-      };
-    }
-
-    let file = req.files.movie_picture;
-
-    cloudinary.v2.uploader.upload(
-      file.tempFilePath,
-      { public_id: uuidv4(), folder: "tickitz" },
-      async function (error, result) {
-        if (error) {
-          throw error;
-        }
-
-        await models.addMovies({
-          users_id,
-          movie_name,
-          category,
-          director,
-          casts,
-          release_date,
-          synopsis,
-          movie_picture: result.public_id,
-          duration,
-          duration_hour: getHour,
-          duration_mins: getMins,
-        });
-      }
-    );
-
-    res.status(201).json({
-      status: "true",
-      code: 201,
-      message: "Success add new movie",
-      data: { ...req.body },
-    });
   } catch (error) {
     res.status(error?.code ?? 500).json({
-      message: error,
+      message: error.message,
     });
   }
 };
@@ -272,94 +277,100 @@ const updateMoviesPartial = async (req, res) => {
       duration_mins,
     } = req.body;
 
-    const getHour = duration.split(":")[0];
-    const getMins = duration.split(":")[1];
-    // const checkId = id
-    // const roleValidator = req.userId
+    const getHour = duration ? duration.split(":")[0] : null;
+    const getMins = duration ? duration.split(":")[1] : null;
 
-    // if (checkId == roleValidator) {
-    const getAllData = await models.getMoviesByID({ id });
+    const roleValidator = req.users_id || null; // middleware for roleValidator
+    const getRole = await models.getRoles({ roleValidator });
+    const isAdmin = getRole[0]?.role;
 
-    if (!req.files) {
-      if (getAllData.length == 0) {
-        throw { code: 400, message: "movies_id not identified" };
-      } else {
-        await models.updateMoviesPartial({
-          movie_name,
-          defaultValue: getAllData[0],
-          category,
-          director,
-          casts,
-          release_date,
-          synopsis,
-          duration,
-          duration_hour: getHour,
-          duration_mins: getMins,
-          id,
-        });
+    if (isAdmin == "ADMIN" && roleValidator == "1") {
+      const getAllData = await models.getMoviesByID({ id });
 
-        res.json({
-          status: "true",
-          message: "data updated",
-          data: {
+      if (!req.files) {
+        if (getAllData.length == 0) {
+          throw { code: 400, message: "movies_id not identified" };
+        } else {
+          await models.updateMoviesPartial({
+            movie_name,
+            defaultValue: getAllData[0],
+            category,
+            director,
+            casts,
+            release_date,
+            synopsis,
+            duration,
+            duration_hour: getHour,
+            duration_mins: getMins,
             id,
-            ...req.body,
-          },
-        });
+          });
+
+          res.json({
+            status: "true",
+            message: "data updated",
+            data: {
+              id,
+              ...req.body,
+            },
+          });
+        }
+      } else {
+        if (getAllData.length == 0) {
+          throw { code: 400, message: "movies_id not identified" };
+        } else {
+          let file = req.files.movie_picture;
+
+          cloudinary.v2.uploader.destroy(
+            getAllData[0].movie_picture,
+            function (error, result) {
+              console.log(result, error);
+            }
+          );
+
+          cloudinary.v2.uploader.upload(
+            file.tempFilePath,
+            { public_id: uuidv4(), folder: "tickitz" },
+            async function (error, result) {
+              if (error) {
+                throw error;
+              }
+
+              await models.updateMoviesPartial({
+                movie_name,
+                defaultValue: getAllData[0],
+                category,
+                director,
+                casts,
+                release_date,
+                synopsis,
+                movie_picture: result.public_id,
+                duration,
+                duration_hour: getHour,
+                duration_mins: getMins,
+                id,
+              });
+            }
+          );
+
+          res.json({
+            status: "true",
+            message: "data updated",
+            data: {
+              id,
+              ...req.body,
+            },
+            profile_picture: req.files.movie_picture.name,
+          });
+        }
       }
     } else {
-      if (getAllData.length == 0) {
-        throw { code: 400, message: "movies_id not identified" };
-      } else {
-        let file = req.files.movie_picture;
-
-        cloudinary.v2.uploader.destroy(
-          getAllData[0].movie_picture,
-          function (error, result) {
-            console.log(result, error);
-          }
-        );
-
-        cloudinary.v2.uploader.upload(
-          file.tempFilePath,
-          { public_id: uuidv4(), folder: "tickitz" },
-          async function (error, result) {
-            if (error) {
-              throw error;
-            }
-
-            await models.updateMoviesPartial({
-              movie_name,
-              defaultValue: getAllData[0],
-              category,
-              director,
-              casts,
-              release_date,
-              synopsis,
-              movie_picture: result.public_id,
-              duration,
-              duration_hour: getHour,
-              duration_mins: getMins,
-              id,
-            });
-          }
-        );
-
-        res.json({
-          status: "true",
-          message: "data updated",
-          data: {
-            id,
-            ...req.body,
-          },
-          profile_picture: req.files.movie_picture.name,
-        });
-      }
+      throw {
+        code: 401,
+        message: "Access not granted, only admin can access this section!",
+      };
     }
-    // } else {
-    //   throw { code: 401 }
-    // }
   } catch (error) {
+    console.log(error);
     if (error.code !== 500) {
       if (
         error.message ==
@@ -369,12 +380,12 @@ const updateMoviesPartial = async (req, res) => {
           message: "Movie with the provided movie_name already exists",
         });
       } else {
-        res.status(error?.code ?? 500).json({
+        res.status(error.code || 500).json({
           message: error.message ?? error,
         });
       }
     } else {
-      res.status(500).json({
+      res.status(error.code || 500).json({
         message: error.message,
       });
     }
@@ -386,18 +397,29 @@ const deleteMovies = async (req, res) => {
     const { id } = req.params;
     const getAllData = await models.getMoviesByID({ id });
 
-    if (getAllData.length == 0) {
-      throw { code: 400, message: "movies_id not identified" };
-    }
+    const roleValidator = req.users_id || null; // middleware for roleValidator
+    const getRole = await models.getRoles({ roleValidator });
+    const isAdmin = getRole[0]?.role;
 
-    await models.deleteMovies({ id });
-    res.json({
-      status: "true",
-      message: "MOVIE DELETED!",
-    });
+    if (isAdmin == "ADMIN" && roleValidator == "1") {
+      if (getAllData.length == 0) {
+        throw { code: 400, message: "movies_id not identified" };
+      }
+
+      await models.deleteMovies({ id });
+      res.json({
+        status: "true",
+        message: "MOVIE DELETED!",
+      });
+    } else {
+      throw {
+        code: 401,
+        message: "Access not granted, only admin can access this section!",
+      };
+    }
   } catch (error) {
-    res.status(500).json({
-      message: error,
+    res.status(error?.code ?? 500).json({
+      message: error.message,
     });
   }
 };

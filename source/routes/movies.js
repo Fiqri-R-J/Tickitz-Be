@@ -2,13 +2,15 @@ const express = require("express");
 const router = express.Router();
 const moviesController = require("../controller/movies");
 const middleware = require("../middleware/movies");
-// const authMiddleware = require("../middleware/auth");
+const authMiddleware = require("../middleware/auth");
 const uploadMiddleware = require("../middleware/upload");
 const redisMiddleware = require("../middleware/redis");
 
 // CREATE
 router.post(
   "/add-movies",
+  authMiddleware.validateToken,
+  authMiddleware.validateRole,
   uploadMiddleware.fileExtLimiter([
     ".png",
     ".jpg",
@@ -41,8 +43,8 @@ router.get(
 // UPDATE
 router.patch(
   "/edit/:id",
-  // authMiddleware.validateToken,
-  // authMiddleware.validateRole,
+  authMiddleware.validateToken,
+  authMiddleware.validateRole,
   uploadMiddleware.fileExtLimiter([
     ".png",
     ".jpg",
@@ -59,8 +61,8 @@ router.patch(
 // DELETE
 router.delete(
   "/delete/:id",
-  // authMiddleware.validateToken,
-  // authMiddleware.validateRole,
+  authMiddleware.validateToken,
+  authMiddleware.validateRole,
   moviesController.deleteMovies
 );
 

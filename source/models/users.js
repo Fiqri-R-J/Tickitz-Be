@@ -92,6 +92,12 @@ const deleteUsers = async (params) => {
   return await db`DELETE FROM users WHERE users_id = ${id}`;
 };
 
+const getRoles = async (params) => {
+  const { roleValidator } = params;
+
+  return await db`SELECT role from users WHERE users_id = ${roleValidator}`;
+};
+
 module.exports = {
   getAllUsers,
   getUsersByEmail,
@@ -105,4 +111,5 @@ module.exports = {
   getUsersByID,
   updateUsersPartial,
   deleteUsers,
+  getRoles,
 };

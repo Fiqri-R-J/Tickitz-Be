@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const usersController = require("../controller/users");
 const middleware = require("../middleware/users");
-// const authMiddleware = require("../middleware/auth");
+const authMiddleware = require("../middleware/auth");
 const uploadMiddleware = require("../middleware/upload");
 const redisMiddleware = require("../middleware/redis");
 
@@ -16,7 +16,6 @@ router.post(
 // READ
 router.get(
   "/:email?",
-  // authMiddleware.validateToken,
   redisMiddleware.getReqAccountByEmail_Redis,
   usersController.getUsersByEmail
 );
@@ -24,8 +23,8 @@ router.get(
 // UPDATE
 router.patch(
   '/edit/:id',
-  // authMiddleware.validateToken,
-  // authMiddleware.validateRole,
+  authMiddleware.validateToken,
+  authMiddleware.validateRole,
   uploadMiddleware.fileExtLimiter([
     '.png',
     '.jpg',
@@ -42,8 +41,8 @@ router.patch(
 // DELETE
 router.delete(
   "/delete/:id",
-  // authMiddleware.validateToken,
-  // authMiddleware.validateRole,
+  authMiddleware.validateToken,
+  authMiddleware.validateRole,
   usersController.deleteUsers
 );
 

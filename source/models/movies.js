@@ -126,6 +126,12 @@ const deleteMovies = async (params) => {
   return await db`DELETE FROM movies WHERE movies_id = ${id}`;
 };
 
+const getRoles = async (params) => {
+  const { roleValidator } = params;
+
+  return await db`SELECT role from users WHERE users_id = ${roleValidator}`;
+};
+
 module.exports = {
   addMovies,
   getMoviesName,
@@ -140,4 +146,5 @@ module.exports = {
   getAllMoviesPaginationSort2,
   getAllMoviesPagination2,
   getAllMoviesSort2,
+  getRoles,
 };

@@ -42,6 +42,7 @@ app.use(
 app.use("/users", require("./routes/users"));
 app.use("/movies", require("./routes/movies"));
 app.use("/auth", require("./routes/auth"));
+app.use("/schedules", require("./routes/schedules"));
 
 app.get("/", (req, res) => {
   res.json({
