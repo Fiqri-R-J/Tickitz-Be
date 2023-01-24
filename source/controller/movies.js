@@ -291,4 +291,30 @@ const updateMoviesPartial = async (req, res) => {
   }
 };
 
-module.exports = { getMoviesbyTitle, addMovies, updateMoviesPartial };
+const deleteMovies = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const getAllData = await models.getMoviesByID({ id });
+
+    if (getAllData.length == 0) {
+      throw { code: 400, message: "movies_id not identified" };
+    }
+
+    await models.deleteMovies({ id });
+    res.json({
+      status: "true",
+      message: "MOVIE DELETED!",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error,
+    });
+  }
+};
+
+module.exports = {
+  getMoviesbyTitle,
+  addMovies,
+  updateMoviesPartial,
+  deleteMovies,
+};

@@ -124,26 +124,7 @@ const updateMoviesPartialValidator = (req, res, next) => {
   });
 };
 
-//   const deleteUsersValidator = (req, res, next) => {
-//     const { id } = req.params;
-
-//     const rules = new Validator(req.params, {
-//       id: "required",
-//     });
-
-//     rules.check().then((matched) => {
-//       if (matched) {
-//         next();
-//       } else {
-//         res.status(422).json({
-//           message: rules.errors,
-//         });
-//       }
-//     });
-//   };
-
 module.exports = {
   createMoviesValidator,
   updateMoviesPartialValidator,
-  // deleteUsersValidator,
 };

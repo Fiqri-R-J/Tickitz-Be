@@ -98,6 +98,12 @@ const updateMoviesPartial = async (params) => {
   WHERE movies_id = ${id} `;
 };
 
+const deleteMovies = async (params) => {
+  const { id } = params;
+
+  return await db`DELETE FROM movies WHERE movies_id = ${id}`;
+};
+
 module.exports = {
   addMovies,
   getMoviesName,
@@ -108,4 +114,5 @@ module.exports = {
   getAllMoviesSort,
   getMoviesByID,
   updateMoviesPartial,
+  deleteMovies,
 };

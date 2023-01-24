@@ -39,4 +39,12 @@ router.patch(
   usersController.updateUsersPartial
 )
 
+// DELETE
+router.delete(
+  "/delete/:id",
+  // authMiddleware.validateToken,
+  // authMiddleware.validateRole,
+  usersController.deleteUsers
+);
+
 module.exports = router;

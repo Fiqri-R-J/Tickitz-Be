@@ -385,4 +385,30 @@ const updateUsersPartial = async (req, res) => {
   }
 };
 
-module.exports = { getUsersByEmail, createUsers, updateUsersPartial };
+const deleteUsers = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const getAllData = await models.getUsersByID({ id });
+
+    if (getAllData.length == 0) {
+      throw { code: 400, message: "users_id not identified" };
+    }
+
+    await models.deleteUsers({ id });
+    res.json({
+      status: "true",
+      message: "USER DELETED!",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error,
+    });
+  }
+};
+
+module.exports = {
+  getUsersByEmail,
+  createUsers,
+  updateUsersPartial,
+  deleteUsers,
+};

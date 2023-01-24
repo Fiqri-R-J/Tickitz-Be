@@ -32,20 +32,28 @@ router.get(
 
 // UPDATE
 router.patch(
-  '/edit/:id',
+  "/edit/:id",
   // authMiddleware.validateToken,
   // authMiddleware.validateRole,
   uploadMiddleware.fileExtLimiter([
-    '.png',
-    '.jpg',
-    '.jpeg',
-    '.PNG',
-    '.JPG',
-    '.JPEG',
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".PNG",
+    ".JPG",
+    ".JPEG",
   ]),
   uploadMiddleware.fileSizeLimiter,
   middleware.updateMoviesPartialValidator,
   moviesController.updateMoviesPartial
-)
+);
+
+// DELETE
+router.delete(
+  "/delete/:id",
+  // authMiddleware.validateToken,
+  // authMiddleware.validateRole,
+  moviesController.deleteMovies
+);
 
 module.exports = router;
