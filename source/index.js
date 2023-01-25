@@ -43,6 +43,7 @@ app.use("/users", require("./routes/users"));
 app.use("/movies", require("./routes/movies"));
 app.use("/auth", require("./routes/auth"));
 app.use("/schedules", require("./routes/schedules"));
+app.use("/payments", require("./routes/payments"));
 
 app.get("/", (req, res) => {
   res.json({

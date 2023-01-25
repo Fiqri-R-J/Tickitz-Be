@@ -32,7 +32,6 @@ const createMoviesValidator = (req, res, next) => {
   });
 
   const rules = new Validator(req.body, {
-    users_id: "required",
     movie_name: "required|minLength:1|maxLength:50",
     category: "required|minLength:1|maxLength:100",
     director: "required|minLength:1|maxLength:100",

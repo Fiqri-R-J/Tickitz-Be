@@ -226,7 +226,7 @@ const addMovies = async (req, res) => {
           }
 
           await models.addMovies({
-            users_id,
+            users_id: roleValidator,
             movie_name,
             category,
             director,

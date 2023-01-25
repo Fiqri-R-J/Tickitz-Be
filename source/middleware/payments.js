@@ -4,33 +4,9 @@ const {
   extend,
 } = require("node-input-validator");
 
-const createSchedulesValidator = (req, res, next) => {
-  extend("regexTime", () => {
-    if (/^([0-9]+:)+[0-9]+$/.test(req.body.time)) {
-      return true;
-    } else {
-      return false;
-    }
-  });
-
-  extend("regexDateStart", () => {
-    if (
-      /^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/.test(
-        req.body.date_start
-      )
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  });
-
-  extend("regexDateEnd", () => {
-    if (
-      /^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$/.test(
-        req.body.date_end
-      )
-    ) {
+const createPaymentsValidator = (req, res, next) => {
+  extend("regexSeat", () => {
+    if (/^([A-G][0-9]{1,2},)*[A-G][0-9]{1,2}$/.test(req.body.selected_seat)) {
       return true;
     } else {
       return false;
@@ -38,19 +14,14 @@ const createSchedulesValidator = (req, res, next) => {
   });
 
   addCustomMessages({
-    "time.regexTime": `Delimiter between hours to minutes, must be a colon (:)`,
-    "date_start.regexDateStart": `Using ISO format (yyyy-mm-dd) is a mandatory`,
-    "date_end.regexDateEnd": `Using ISO format (yyyy-mm-dd) is a mandatory`,
+    "selected_seat.regexSeat": `Delimiter between seats must be a comma (,)`,
   });
 
   const rules = new Validator(req.body, {
     movies_id: "required",
-    time: "required|regexTime",
-    location: "required",
-    price: "required",
-    date_start: "required|regexDateStart",
-    date_end: "required|regexDateEnd",
-    cinema: "required",
+    schedules_id: "required",
+    payment_method: "required",
+    selected_seat: "required|regexSeat",
   });
 
   rules.check().then((matched) => {
@@ -64,7 +35,7 @@ const createSchedulesValidator = (req, res, next) => {
   });
 };
 
-const updateSchedulesPartialValidator = (req, res, next) => {
+const updatePaymentsPartialValidator = (req, res, next) => {
   const {
     users_id,
     movies_id,
@@ -74,6 +45,7 @@ const updateSchedulesPartialValidator = (req, res, next) => {
     date_start,
     date_end,
     cinema,
+    available_seat,
   } = req.body;
 
   extend("regexTime", () => {
@@ -137,6 +109,6 @@ const updateSchedulesPartialValidator = (req, res, next) => {
 };
 
 module.exports = {
-  createSchedulesValidator,
-  updateSchedulesPartialValidator,
+  createPaymentsValidator,
+  updatePaymentsPartialValidator,
 };
