@@ -44,24 +44,25 @@ nodemon
 * 201 ```Create Success``` - the request was successful.
 * 400 ```Bad Request``` - You've made an invalid request or to an invalid endpoint.
 * 401 ```Unauthorized``` - The request has not been applied because it lacks valid authentication credentials for the target resource.
-* 404 ```Not Found``` - Kuma Book responded with a 404
+* 403 ```Forbidden``` - No Token provide.
 * 422 ```Unprocessable Entity``` - Unable to process the contained instructions
+* 500 ``` Server Error``` - Server error
 
 ## JSON Response
 This is a typical response
 ```json
 {
-    "status": false,
-    "message": "Resource does not exist",
-    "data": [],
-    "option": []
+    "message": "Success get all data users",
+    "code": 200,
+    "total": 15,
+    "data": []
 }
 ```
 
-* ```status``` - Status response returned
 * ```message```- Appropriate message from the REST API
+* ```code``` - Status response returned
+* ```total``` - Total data
 * ```data``` - Return data from database
-* ```options``` - Return optional data Like pagination or etc
 
 # Routes
 
@@ -69,58 +70,37 @@ This is a typical response
 ## Auth Routes
 
 - **POST** Login Endpoint Path:```/login/```
-- **POST** Sign In Endpoint Path:```/signin/```
-- **POST** Activate Endpoint Path:```/activate/```
 
-## Author Routes
+## Users Routes
 
-- **GET** Author Endpoint Path: ```/author[/{id}]```
-- **POST** Author Endpoint Path:```/author/```
-- **PATCH** Author Endpoint Path: ```/author/{id}```
-- **DELETE** Author Endpoint Path: ```/author/{id}```
+- **GET** Users Endpoint Path: ```/users/{email}```
+- **POST** Users Endpoint Path:```/users/register```
+- **PATCH** Users Endpoint Path: ```/users/edit/{id}```
+- **DELETE** Users Endpoint Path: ```/users/delete/{id}```
 
-## Book Routes
+## Movies Routes
 
-- **GET** Book Endpoint Path: ```/book[/{id}/{?search=[keyword]}&{?sort=1}]```
-- **POST** Book Endpoint Path:```/book/```
-- **PATCH** Book Endpoint Path: ```/book/{id}```
-- **PATCH** Book Cover Endpoint Path: ```/book/cover/{id}```
-- **DELETE** Book Endpoint Path: ```/book/{id}```
+- **GET** Movies JOIN WITH SCHEDULES (sort by created_at) Endpoint Path: ```/movies/search-join/?page=1&limit=4&sort=DESC```
+- **GET** Movies (search all or by movies_name) & SORT by created_at Endpoint Path: ```/movies/search/?page=1&limit=1&sort=DESC```
+- **GET** Movies (search all or by movies_name) & SORT by release_date Endpoint Path: ```/movies/search-2?page=1&limit=1&sort=DESC```
+- **POST** Movies Endpoint Path:```/movies/add-movies/```
+- **PATCH** Movies Endpoint Path: ```/movies/edit/{id}```
+- **DELETE** Movies Endpoint Path: ```/movies/delete/{id}```
 
-## Favorite Routes
+## SCHEDULES Routes
 
-- **GET** Favorite Endpoint Path: ```/favorite[/{id}]```
-- **POST** Favorite Endpoint Path:```/favorite/```
-- **PATCH** Favorite Endpoint Path: ```/favorite/{id}```
-- **DELETE** Favorite Endpoint Path: ```/favorite/{id}```
+- **GET** SCHEDULES(search all or by location) & SORT by time Endpoint Path: ```/schedules/search/```
+- **GET** SCHEDULES(search all or by cinema) & SORT by created_at Endpoint Path: ```/schedules/search-2/```
+- **POST** SCHEDULES Endpoint Path:```/schedules/add-schedules```
+- **PATCH** SCHEDULES Endpoint Path: ```/schedules/edit/{id}```
+- **DELETE** SCHEDULES Endpoint Path: ```/schedules/delete/{id}```
 
-## Genre Routes
+## PAYMENTS Routes
 
-- **GET** Genre Endpoint Path: ```/genre[/{id}]```
-- **POST** Genre Endpoint Path:```/genre/```
-- **PATCH** Genre Endpoint Path: ```/genre/{id}```
-- **DELETE** Genre Endpoint Path: ```/genre/{id}```
-
-## Review Routes
-
-- **GET** Review Endpoint Path: ```/review[/{id}]```
-- **POST** Review Endpoint Path:```/review/```
-- **PATCH** Review Endpoint Path: ```/review/{id}```
-- **DELETE** Review Endpoint Path: ```/review/{id}```
-
-## Profile Routes
-
-- **GET** Profile Endpoint Path: ```/profile[/{id}]```
-- **POST** Profile Endpoint Path:```/profile/```
-- **PATCH** Profile Endpoint Path: ```/profile/{id}```
-- **DELETE** Profile Endpoint Path: ```/profile/{id}```
-
-## Sosmed Routes
-
-- **GET** Sosmed Endpoint Path: ```/sosmed[/{id}]```
-- **POST** Sosmed Endpoint Path:```/sosmed/```
-- **PATCH** Sosmed Endpoint Path: ```/sosmed/{id}```
-- **DELETE** Sosmed Endpoint Path: ```/sosmed/{id}```
+- **GET** PAYMENTS - JOIN ALL TABLES Endpoint Path: ```/payments/search-join?page=1&limit=5```
+- **GET** PAYMENTS (search all or by payments_id) SORT by created_at Endpoint Path: ```/payments/search/```
+- **POST** PAYMENTS Endpoint Path:```/payments/add-payments```
+- **PATCH** PAYMENTS Endpoint Path: ```/payments/edit/{id}```
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
