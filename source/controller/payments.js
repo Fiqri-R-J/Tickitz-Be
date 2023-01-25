@@ -210,6 +210,10 @@ const getPayments = async (req, res) => {
   }
 };
 
+const getJoinTable = async (req, res) => {
+    
+};
+
 const updatePayments = async (req, res) => {
   try {
     const { id } = req.params;
@@ -220,7 +224,7 @@ const updatePayments = async (req, res) => {
     const isAdmin = getRole[0]?.role;
 
     const getAllData = await models.getPaymentsbyIds({ id });
-    console.log(getAllData);
+
     if (getAllData.length == 0) {
       throw { code: 400, message: "payments_id not identified" };
     } else {
@@ -246,4 +250,4 @@ const updatePayments = async (req, res) => {
   }
 };
 
-module.exports = { addPayments, getPayments, updatePayments };
+module.exports = { addPayments, getPayments, updatePayments, getJoinTable };

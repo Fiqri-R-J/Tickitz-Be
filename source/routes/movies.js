@@ -40,6 +40,14 @@ router.get(
   moviesController.getMoviesbyTitle2
 );
 
+// READ - JOIN MOVIES WITH SCHEDULES
+router.get(
+  "/search-join/:title?",
+  // authMiddleware.validateToken,
+  redisMiddleware.getReqMoviesByTitle_Redis,
+  moviesController.getMoviesJoin
+);
+
 // UPDATE
 router.patch(
   "/edit/:id",

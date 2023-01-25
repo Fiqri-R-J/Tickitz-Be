@@ -21,14 +21,19 @@ router.get(
   paymentsController.getPayments
 );
 
-
+// JOIN TABLE
+router.get(
+    "/search-join",
+    // redisMiddleware.getPayments_Redis,
+    paymentsController.getJoinTable
+  );
 
 // UPDATE
 router.patch(
   "/edit/:id",
   authMiddleware.validateToken,
   authMiddleware.validateRole,
-//   middleware.updatePaymentsPartialValidator,
+  //   middleware.updatePaymentsPartialValidator,
   paymentsController.updatePayments
 );
 

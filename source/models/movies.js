@@ -19,7 +19,7 @@ const addMovies = async (params) => {
     duration,
     duration_hour,
     duration_mins,
-    roleValidator
+    roleValidator,
   } = params;
 
   return await db`INSERT INTO movies ("users_id", "movie_name", "category", "director", "casts", "release_date", "synopsis", "movie_picture", "duration", "duration_hour", "duration_mins") VALUES
@@ -30,10 +30,27 @@ const getAllMovies = async () => {
   return await db`SELECT * FROM movies ORDER BY created_at ASC`;
 };
 
+const getAllMoviesJoin = async () => {
+  return await db`SELECT movies.*, schedules.*
+  FROM movies
+  JOIN schedules ON schedules.movies_id = movies.movies_id
+  ORDER BY movies.created_at ASC`;
+};
+
 const getMoviesByTitle = async (params) => {
   const { title } = params;
 
   return await db`SELECT * FROM movies WHERE movie_name LIKE '%' || ${title} || '%'`;
+};
+
+const getMoviesByTitleJoin = async (params) => {
+  const { title } = params;
+
+  return await db`SELECT movies.*, schedules.*
+FROM movies
+JOIN schedules ON schedules.movies_id = movies.movies_id
+WHERE movies.movie_name LIKE '%' || ${title} || '%'
+ORDER BY movies.created_at ASC`;
 };
 
 const getAllMoviesPaginationSort = async (params) => {
@@ -42,6 +59,21 @@ const getAllMoviesPaginationSort = async (params) => {
   return await db`SELECT * FROM movies ${
     sort ? db`ORDER BY created_at DESC` : db`ORDER BY created_at ASC`
   } LIMIT ${limit} OFFSET ${limit * (page - 1)}`;
+};
+
+const getAllMoviesPaginationSortJoin = async (params) => {
+  const { limit, page, sort } = params;
+
+  return await db`
+  SELECT movies.*, schedules.*
+  FROM movies
+  JOIN schedules ON schedules.movies_id = movies.movies_id
+  ${
+    sort
+      ? db`ORDER BY movies.created_at DESC`
+      : db`ORDER BY movies.created_at ASC`
+  }
+  LIMIT ${limit} OFFSET ${limit * (page - 1)}`;
 };
 
 const getAllMoviesPaginationSort2 = async (params) => {
@@ -60,6 +92,16 @@ const getAllMoviesPagination = async (params) => {
   }`;
 };
 
+const getAllMoviesPaginationJoin = async (params) => {
+  const { limit, page } = params;
+
+  return await db`
+  SELECT movies.*, schedules.*
+  FROM movies
+  JOIN schedules ON schedules.movies_id = movies.movies_id
+  LIMIT ${limit} OFFSET ${limit * (page - 1)}`;
+};
+
 const getAllMoviesPagination2 = async (params) => {
   const { limit, page } = params;
 
@@ -75,6 +117,17 @@ const getAllMoviesSort = async (params) => {
     sort ? db`ORDER BY created_at DESC` : db`ORDER BY created_at ASC`
   } `;
 };
+
+const getAllMoviesSortJoin = async (params) => {
+  const { sort } = params;
+
+  return await db`
+  SELECT movies.*, schedules.*
+  FROM movies
+  JOIN schedules ON schedules.movies_id = movies.movies_id
+  ${sort ? db`ORDER BY movies.created_at DESC` : db`ORDER BY movies.created_at ASC`}`;
+};
+
 
 const getAllMoviesSort2 = async (params) => {
   const { sort } = params;
@@ -148,4 +201,9 @@ module.exports = {
   getAllMoviesPagination2,
   getAllMoviesSort2,
   getRoles,
+  getAllMoviesJoin,
+  getMoviesByTitleJoin,
+  getAllMoviesPaginationSortJoin,
+  getAllMoviesPaginationJoin,
+  getAllMoviesSortJoin,
 };
