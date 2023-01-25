@@ -7,9 +7,9 @@ const getRoles = async (params) => {
 };
 
 const getMoviesId = async (params) => {
-  const { movie_id } = params;
+  const { movies_id } = params;
 
-  return await db`SELECT * FROM movies WHERE movie_id = ${movie_id}`;
+  return await db`SELECT * FROM movies WHERE movies_id = ${movies_id}`;
 };
 
 const getUsersId = async (params) => {
@@ -17,6 +17,23 @@ const getUsersId = async (params) => {
 
   return await db`SELECT * FROM users WHERE users_id = ${users_id}`;
 };
+
+// const addSchedules = async (params) => {
+//   const {
+//     users_id,
+//     movies_id,
+//     time,
+//     location,
+//     price,
+//     date_start,
+//     date_end,
+//     cinema,
+//     available_seat,
+//   } = params;
+
+//   return await db`INSERT INTO schedules ("users_id", "movies_id", "time", "location", "price", "date_start", "date_end", "cinema", "available_seat") VALUES
+//       (${users_id}, ${movies_id}, ${time}, ${location}, ${price}, ${date_start}, ${date_end}, ${cinema}, ${available_seat})`;
+// };
 
 const addSchedules = async (params) => {
   const {
@@ -28,11 +45,11 @@ const addSchedules = async (params) => {
     date_start,
     date_end,
     cinema,
-    available_seat,
+    roleValidator,
   } = params;
 
-  return await db`INSERT INTO schedules ("users_id", "movies_id", "time", "location", "price", "date_start", "date_end", "cinema", "available_seat") VALUES
-      (${users_id}, ${movies_id}, ${time}, ${location}, ${price}, ${date_start}, ${date_end}, ${cinema}, ${available_seat})`;
+  return await db`INSERT INTO schedules ("users_id", "movies_id", "time", "location", "price", "date_start", "date_end", "cinema") VALUES
+      (${users_id}, ${movies_id}, ${time}, ${location}, ${price}, ${date_start}, ${date_end}, ${cinema})`;
 };
 
 const getAllSchedules = async () => {
@@ -109,6 +126,36 @@ const getSchedulesByID = async (params) => {
   return await db`SELECT * FROM schedules WHERE schedules_id = ${id}`;
 };
 
+// const updateSchedulesPartial = async (params) => {
+//   const {
+//     roleValidator,
+//     users_id,
+//     movies_id,
+//     time,
+//     location,
+//     price,
+//     date_start,
+//     date_end,
+//     cinema,
+//     available_seat,
+//     defaultValue,
+//     id,
+//   } = params;
+
+//   return await db`UPDATE schedules
+//   SET users_id = ${roleValidator || defaultValue?.users_id},
+//   movies_id = ${movies_id || defaultValue?.movies_id},
+//    time = ${time || defaultValue?.time},
+//    location =${location || defaultValue?.location},
+//    price = ${price || defaultValue?.price},
+//    date_start = ${date_start || defaultValue?.date_start},
+//    date_end = ${date_end || defaultValue?.date_end},
+//    cinema = ${cinema || defaultValue?.cinema},
+//    available_seat = ${available_seat || defaultValue?.available_seat},
+//    updated_at = NOW() AT TIME ZONE 'Asia/Jakarta'
+//   WHERE schedules_id = ${id} `;
+// };
+
 const updateSchedulesPartial = async (params) => {
   const {
     roleValidator,
@@ -120,7 +167,6 @@ const updateSchedulesPartial = async (params) => {
     date_start,
     date_end,
     cinema,
-    available_seat,
     defaultValue,
     id,
   } = params;
@@ -134,7 +180,6 @@ const updateSchedulesPartial = async (params) => {
    date_start = ${date_start || defaultValue?.date_start},
    date_end = ${date_end || defaultValue?.date_end},
    cinema = ${cinema || defaultValue?.cinema},
-   available_seat = ${available_seat || defaultValue?.available_seat},
    updated_at = NOW() AT TIME ZONE 'Asia/Jakarta' 
   WHERE schedules_id = ${id} `;
 };

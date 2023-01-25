@@ -19,6 +19,7 @@ const addMovies = async (params) => {
     duration,
     duration_hour,
     duration_mins,
+    roleValidator
   } = params;
 
   return await db`INSERT INTO movies ("users_id", "movie_name", "category", "director", "casts", "release_date", "synopsis", "movie_picture", "duration", "duration_hour", "duration_mins") VALUES

@@ -19,12 +19,14 @@ const addSchedules = async (req, res) => {
     const getRole = await models.getRoles({ roleValidator });
     const isAdmin = getRole[0]?.role;
 
-    console.log(roleValidator);
+    const getMovies = await models.getMoviesId({ movies_id });
 
     if (isAdmin == "ADMIN" && roleValidator == "1") {
-      console.log(isAdmin);
+      if (getMovies.length == 0) {
+        throw { code: 400, message: "movies_id not identified" };
+      }
       await models.addSchedules({
-        users_id,
+        users_id: roleValidator,
         movies_id,
         time,
         location,
@@ -32,7 +34,6 @@ const addSchedules = async (req, res) => {
         date_start,
         date_end,
         cinema,
-        available_seat,
       });
 
       res.status(201).json({
@@ -289,7 +290,6 @@ const updateSchedulesPartial = async (req, res) => {
           date_start,
           date_end,
           cinema,
-          available_seat,
           id,
         });
 
