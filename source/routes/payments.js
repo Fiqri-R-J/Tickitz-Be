@@ -14,28 +14,23 @@ router.post(
   paymentsController.addPayments
 );
 
-// // READ - SORT BY TIME & SEARCH BY LOCATION
-// router.get(
-//   "/search/:title?",
-//   redisMiddleware.getSchedules_Redis,
-//   schedulesController.getSchedulesbyLocation
-// );
+// READ - SORT BY CREATED_AT & SEARCH BY PAYMENTS_ID
+router.get(
+  "/search/:title?",
+  redisMiddleware.getPayments_Redis,
+  paymentsController.getPayments
+);
 
-// // READ - SORT BY CREATED_AT & SEARCH BY CINEMA
-// router.get(
-//   "/search-2/:title?",
-//   redisMiddleware.getSchedules_Redis,
-//   schedulesController.getSchedulesbyLocation2
-// );
 
-// // UPDATE
-// router.patch(
-//   "/edit/:id",
-//   authMiddleware.validateToken,
-//   authMiddleware.validateRole,
-//   middleware.updateSchedulesPartialValidator,
-//   schedulesController.updateSchedulesPartial
-// );
+
+// UPDATE
+router.patch(
+  "/edit/:id",
+  authMiddleware.validateToken,
+  authMiddleware.validateRole,
+//   middleware.updatePaymentsPartialValidator,
+  paymentsController.updatePayments
+);
 
 // // DELETE
 // router.delete(

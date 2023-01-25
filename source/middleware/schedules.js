@@ -122,7 +122,7 @@ const updateSchedulesPartialValidator = (req, res, next) => {
     date_start: date_start ? "required|regexDateStart" : "regexDateStart",
     date_end: date_end ? "required|regexDateEnd" : "regexDateEnd",
     cinema: cinema ? "required" : "minLength:1",
-    available_seat: available_seat ? "required" : "minLength:1",
+    // available_seat: available_seat ? "required" : "minLength:1",
   });
 
   rules.check().then((matched) => {

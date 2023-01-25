@@ -220,9 +220,81 @@ const getSchedules_Redis = async (req, res, next) => {
   }
 };
 
+const getPayments_Redis = async (req, res, next) => {
+  try {
+    const url = await connectRedis.get("url");
+    const matchedUrl = url == req.originalUrl;
+    const find_schedules = await connectRedis.get("find_schedules");
+    const find_all_schedules = await connectRedis.get("find_all_schedules");
+    const location = await connectRedis.get("location");
+    const page = await connectRedis.get("page");
+    const limit = await connectRedis.get("limit");
+    const isPaginated = await connectRedis.get("isPaginated");
+    const isSorted = await connectRedis.get("isSorted");
+    const getReqAccPagi = await connectRedis.get("getReqAccPagi");
+    const dataPerPage = await connectRedis.get("dataPerPage");
+    const sortedData = await connectRedis.get("sortedData");
+    const getReqSchedules = await connectRedis.get("getReqSchedules");
+
+    if (matchedUrl) {
+      if (find_schedules && !find_all_schedules) {
+        res.json({
+          REDIS: true,
+          message: `Get Schedules With Location: ${location}`,
+          code: 200,
+          total: JSON.parse(getReqSchedules).length,
+          data: JSON.parse(getReqSchedules),
+        });
+      }
+      if (isSorted || find_all_schedules) {
+        !find_all_schedules
+          ? res.json({
+              REDIS: true,
+              message:
+                location !== null
+                  ? `Get Payments detail With payments_id: ${location}`
+                  : "Success get all Payments detail",
+              code: 200,
+              total: JSON.parse(sortedData).length,
+              data: JSON.parse(sortedData),
+            })
+          : res.json({
+              REDIS: true,
+              message: "Success get all Payments detail",
+              code: 200,
+              total: JSON.parse(getReqSchedules).length,
+              data: JSON.parse(getReqSchedules),
+            });
+      }
+      if (isPaginated && !isSorted) {
+        res.json({
+          REDIS: true,
+          message: "success get Payments detail",
+          code: 200,
+          total: JSON.parse(getReqAccPagi).length,
+          dataPerPage: JSON.parse(dataPerPage).length,
+          page: `${page} from ${Math.ceil(
+            JSON.parse(getReqAccPagi).length / limit
+          )}`,
+          data: JSON.parse(dataPerPage),
+        });
+      }
+    } else {
+      next();
+    }
+  } catch (error) {
+    res.status(500).json({
+      REDIS: true,
+      message: `${error}`,
+      data: [],
+    });
+  }
+};
+
 module.exports = {
   connectRedis,
   getReqAccountByEmail_Redis,
   getReqMoviesByTitle_Redis,
   getSchedules_Redis,
+  getPayments_Redis,
 };
