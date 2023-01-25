@@ -14,7 +14,7 @@ const createPaymentsValidator = (req, res, next) => {
   });
 
   addCustomMessages({
-    "selected_seat.regexSeat": `Delimiter between seats must be a comma (,)`,
+    "selected_seat.regexSeat": `Delimiter between seats must be a comma (,) & must be in Capital Letters`,
   });
 
   const rules = new Validator(req.body, {

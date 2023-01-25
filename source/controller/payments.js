@@ -39,6 +39,7 @@ const addPayments = async (req, res) => {
       selected_seat,
     });
 
+    //for filtering available_seat based on selected_seat
     const regex = /"|^\{|\}/g;
     const currentAvailableSeats = getSchedules[0].available_seat.replace(
       regex,
@@ -51,25 +52,7 @@ const addPayments = async (req, res) => {
       .filter((seat) => !selectedSeatArr.includes(seat))
       .join(",");
 
-    // let error = null;
-    // selectedSeatArr.some((seat) => {
-    //   if (!currentAvailableSeats.includes(seat)) {
-    //     error = `Seat ${seat} is already taken`;
-    //     return true;
-    //   }
-    // });
-
-    // console.log(selectedSeatArr);
-    // console.log(currentAvailableSeats);
-
-    // if (error) {
-    //   throw {
-    //     code: 400,
-    //     message: `${error}, please choose another seat`,
-    //   };
-    // }
-    // console.log(currentAvailableSeats);
-
+    //for the message result
     let taken = [];
     let temp = "";
     for (let i = 0; i < currentAvailableSeats.length; i++) {
@@ -80,7 +63,6 @@ const addPayments = async (req, res) => {
         temp = temp + currentAvailableSeats[i];
       }
     }
-    // console.log(taken);
 
     let temps = [];
     for (let i = 0; i < taken.length; i++) {
@@ -90,31 +72,16 @@ const addPayments = async (req, res) => {
         }
       }
     }
-    // console.log(temps);
-    console.log(temps);
-    console.log(selectedSeatArr);
-    console.log(temps.length >= selectedSeatArr.length);
+
+    let filteredArray = selectedSeatArr.filter((item) => !temps.includes(item));
+
     if (temps.length !== selectedSeatArr.length) {
       throw {
         code: 400,
-        message: `Seat ${selectedSeatArr.join(", ")} is not available`,
+        message: `Seat ${filteredArray.join(", ")} is not available`,
       };
     }
-
-    // let takenSeats = [];
-    // selectedSeatArr.forEach((seat) => {
-    //   if (currentAvailableSeats.includes(seat)) {
-    //     takenSeats.push(seat);
-    //   }
-    // });
-
-    // if (takenSeats.length > 0) {
-    //   throw {
-    //     code: 400,
-    //     message: `Seat ${takenSeats.join(", ")} is not available`,
-    //   };
-    // }
-
+    //end of --- for the message result
     await models.updateSchedulesSeat({
       available_seat: updatedAvailableSeats,
       id: schedules_id,
