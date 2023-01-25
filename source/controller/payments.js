@@ -211,7 +211,104 @@ const getPayments = async (req, res) => {
 };
 
 const getJoinTable = async (req, res) => {
-    
+  try {
+    const { title } = req.params;
+    const { page, limit, sort } = req.query;
+
+    const totalDatas = await models.getPaymentsJoin();
+
+    let getSchedulesData;
+    let getAllData;
+
+    if (title) {
+      console.log("test");
+      getSchedulesData = await models.getPaymentsbyIdJoin({ title });
+      connectRedis.set("find_schedules", true, "ex", 10);
+      connectRedis.set("url", req.originalUrl, "ex", 10);
+      connectRedis.set("location", title, "ex", 10);
+      connectRedis.set(
+        "getReqSchedules",
+        JSON.stringify(getSchedulesData),
+        "ex",
+        10
+      );
+      if (getSchedulesData && getSchedulesData.length > 0) {
+        res.json({
+          message: `Get Payments detail With payments_id: ${title}`,
+          code: 200,
+          data: getSchedulesData,
+        });
+      } else {
+        throw { code: 422, message: "Data not found" };
+      }
+    }
+    if (!title && !page && !limit && !sort) {
+      getSchedulesData = totalDatas;
+      connectRedis.set("url", req.originalUrl, "ex", 10);
+      connectRedis.set("find_all_schedules", true, "ex", 10);
+      connectRedis.set(
+        "getReqSchedules",
+        JSON.stringify(getSchedulesData),
+        "ex",
+        10
+      );
+      res.json({
+        message: "Success get all Payments detail",
+        code: 200,
+        total: getSchedulesData.length,
+        data: getSchedulesData,
+      });
+    }
+    if (page || limit || sort) {
+      if (page && limit && sort) {
+        getAllData = await models.getAllPaymentsPaginationSortJoin({
+          sort,
+          limit,
+          page,
+        });
+      } else if (page && limit) {
+        getAllData = await models.getAllPaymentsPaginationJoin({ limit, page });
+        connectRedis.set("url", req.originalUrl, "ex", 10);
+        connectRedis.set("page", page, "ex", 10);
+        connectRedis.set("limit", limit, "ex", 10);
+        connectRedis.set("dataPerPage", JSON.stringify(getAllData), "ex", 10);
+        connectRedis.set("getReqAccPagi", JSON.stringify(totalDatas), "ex", 10);
+        connectRedis.set("isPaginated", true, "ex", 10);
+      } else if (sort) {
+        getAllData = await models.getAllPaymentsSortJoin({ sort });
+        connectRedis.set("url", req.originalUrl, "ex", 10);
+        connectRedis.set("isSorted", true, "ex", 10);
+        connectRedis.set("sortedData", JSON.stringify(getAllData), "ex", 10);
+        res.json({
+          message: "Success get all schedules",
+          total: getAllData.length,
+          data: getAllData,
+        });
+      }
+    }
+
+    if ((page && limit && sort) || (page && limit)) {
+      connectRedis.set("url", req.originalUrl, "ex", 10);
+      connectRedis.set("page", page, "ex", 10);
+      connectRedis.set("limit", limit, "ex", 10);
+      connectRedis.set("dataPerPage", JSON.stringify(getAllData), "ex", 10);
+      connectRedis.set("getReqAccPagi", JSON.stringify(totalDatas), "ex", 10);
+      connectRedis.set("isPaginated", true, "ex", 10);
+      res.json({
+        message: "success get Payments detail",
+        code: 200,
+        total: totalDatas.length,
+        dataPerPage: getAllData.length,
+        page: `${page} from ${Math.ceil(totalDatas.length / limit)}`,
+        data: getAllData,
+      });
+    }
+  } catch (error) {
+    res.status(error?.code ?? 500).json({
+      serverMessage: error,
+      data: [],
+    });
+  }
 };
 
 const updatePayments = async (req, res) => {
