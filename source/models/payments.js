@@ -46,10 +46,32 @@ const getPayments = async () => {
   return await db`SELECT * FROM payments ORDER BY created_at ASC`;
 };
 
+const getPaymentsJoin = async () => {
+  return await db`
+    SELECT movies.movie_name, movies.category, schedules.time, schedules.price, schedules.date_start, schedules.date_end, schedules.cinema, payments.ticket_qty, payments.selected_seat, payments.total_payment, payments.ticket_status, payments.payments_id, payments.created_at
+    FROM movies
+    JOIN schedules ON movies.movies_id = schedules.movies_id
+    JOIN payments ON schedules.schedules_id = payments.schedules_id
+    ORDER BY payments.created_at
+  `;
+};
+
 const getPaymentsbyId = async (params) => {
   const { title } = params;
 
   return await db`SELECT * FROM payments WHERE payments_id LIKE '%' || ${title} || '%'`;
+};
+
+const getPaymentsbyIdJoin = async (params) => {
+  const { title } = params;
+
+  return await db`
+    SELECT movies.movie_name, movies.category, schedules.time, schedules.price, schedules.date_start, schedules.date_end, schedules.cinema, payments.ticket_qty, payments.selected_seat, payments.total_payment, payments.ticket_status, payments.payments_id, payments.created_at
+    FROM movies
+    JOIN schedules ON movies.movies_id = schedules.movies_id
+    JOIN payments ON schedules.schedules_id = payments.schedules_id
+    WHERE payments.payments_id = ${title}
+  `;
 };
 
 const getAllPaymentsPaginationSort = async (params) => {
@@ -60,6 +82,22 @@ const getAllPaymentsPaginationSort = async (params) => {
   } LIMIT ${limit} OFFSET ${limit * (page - 1)}`;
 };
 
+const getAllPaymentsPaginationSortJoin = async (params) => {
+  const { limit, page, sort } = params;
+
+  return await db`
+    SELECT movies.movie_name, movies.category, schedules.time, schedules.price, schedules.date_start, schedules.date_end, schedules.cinema, payments.ticket_qty, payments.selected_seat, payments.total_payment, payments.ticket_status, payments.payments_id, payments.created_at
+    FROM movies
+    JOIN schedules ON movies.movies_id = schedules.movies_id
+    JOIN payments ON schedules.schedules_id = payments.schedules_id
+    ${
+      sort
+        ? db`ORDER BY payments.created_at DESC`
+        : db`ORDER BY payments.created_at ASC`
+    }
+    LIMIT ${limit} OFFSET ${limit * (page - 1)}`;
+};
+
 const getAllPaymentsPagination = async (params) => {
   const { limit, page } = params;
 
@@ -68,12 +106,39 @@ const getAllPaymentsPagination = async (params) => {
   }`;
 };
 
+const getAllPaymentsPaginationJoin = async (params) => {
+  const { limit, page } = params;
+
+  return await db`
+    SELECT movies.movie_name, movies.category, schedules.time, schedules.price, schedules.date_start, schedules.date_end, schedules.cinema, payments.ticket_qty, payments.selected_seat, payments.total_payment, payments.ticket_status, payments.payments_id, payments.created_at
+    FROM movies
+    JOIN schedules ON movies.movies_id = schedules.movies_id
+    JOIN payments ON schedules.schedules_id = payments.schedules_id
+    ORDER BY payments.created_at
+    LIMIT ${limit} OFFSET ${limit * (page - 1)}`;
+};
+
 const getAllPaymentsSort = async (params) => {
   const { sort } = params;
 
   return await db`SELECT * FROM payments ${
     sort ? db`ORDER BY created_at DESC` : db`ORDER BY created_at ASC`
   } `;
+};
+
+const getAllPaymentsSortJoin = async (params) => {
+  const { sort } = params;
+
+  return await db`
+    SELECT movies.movie_name, movies.category, schedules.time, schedules.price, schedules.date_start, schedules.date_end, schedules.cinema, payments.ticket_qty, payments.selected_seat, payments.total_payment, payments.ticket_status, payments.payments_id, payments.created_at
+    FROM movies
+    JOIN schedules ON movies.movies_id = schedules.movies_id
+    JOIN payments ON schedules.schedules_id = payments.schedules_id
+    ${
+      sort
+        ? db`ORDER BY payments.created_at DESC`
+        : db`ORDER BY payments.created_at ASC`
+    }`;
 };
 
 const updatePaymentsPartial = async (params) => {
@@ -104,4 +169,9 @@ module.exports = {
   getAllPaymentsSort,
   updatePaymentsPartial,
   getPaymentsbyIds,
+  getPaymentsbyIdJoin,
+  getPaymentsJoin,
+  getAllPaymentsPaginationSortJoin,
+  getAllPaymentsPaginationJoin,
+  getAllPaymentsSortJoin,
 };

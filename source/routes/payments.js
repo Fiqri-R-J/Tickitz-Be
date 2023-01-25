@@ -23,10 +23,10 @@ router.get(
 
 // JOIN TABLE
 router.get(
-    "/search-join",
-    // redisMiddleware.getPayments_Redis,
-    paymentsController.getJoinTable
-  );
+  "/search-join/:title?",
+  redisMiddleware.getPayments_Redis,
+  paymentsController.getJoinTable
+);
 
 // UPDATE
 router.patch(
