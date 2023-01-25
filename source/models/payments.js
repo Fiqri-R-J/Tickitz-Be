@@ -42,10 +42,49 @@ const updateSchedulesSeat = async (params) => {
   return await db`UPDATE schedules SET available_seat = ${available_seat}, updated_at = NOW() AT TIME ZONE 'Asia/Jakarta' WHERE schedules_id = ${id}`;
 };
 
+const getPayments = async () => {
+  return await db`SELECT * FROM payments ORDER BY created_at ASC`;
+};
+
+const getPaymentsbyId = async (params) => {
+  const { title } = params;
+
+  return await db`SELECT * FROM payments WHERE payments_id LIKE '%' || ${title} || '%'`;
+};
+
+const getAllPaymentsPaginationSort = async (params) => {
+  const { limit, page, sort } = params;
+
+  return await db`SELECT * FROM payments ${
+    sort ? db`ORDER BY created_at DESC` : db`ORDER BY created_at ASC`
+  } LIMIT ${limit} OFFSET ${limit * (page - 1)}`;
+};
+
+const getAllPaymentsPagination = async (params) => {
+  const { limit, page } = params;
+
+  return await db`SELECT * FROM payments ORDER BY created_at ASC LIMIT ${limit} OFFSET ${
+    limit * (page - 1)
+  }`;
+};
+
+const getAllPaymentsSort = async (params) => {
+  const { sort } = params;
+
+  return await db`SELECT * FROM payments ${
+    sort ? db`ORDER BY created_at DESC` : db`ORDER BY created_at ASC`
+  } `;
+};
+
 module.exports = {
   getRoles,
   getMoviesId,
   getSchedulesId,
   addPayments,
   updateSchedulesSeat,
+  getPayments,
+  getPaymentsbyId,
+  getAllPaymentsPaginationSort,
+  getAllPaymentsPagination,
+  getAllPaymentsSort,
 };

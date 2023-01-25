@@ -14,12 +14,12 @@ router.post(
   paymentsController.addPayments
 );
 
-// // READ - SORT BY TIME & SEARCH BY LOCATION
-// router.get(
-//   "/search/:title?",
-//   redisMiddleware.getSchedules_Redis,
-//   schedulesController.getSchedulesbyLocation
-// );
+// READ - SORT BY TIME & SEARCH BY LOCATION
+router.get(
+  "/search/:title?",
+  redisMiddleware.getPayments_Redis,
+  paymentsController.getPayments
+);
 
 // // READ - SORT BY CREATED_AT & SEARCH BY CINEMA
 // router.get(
