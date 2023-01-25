@@ -210,4 +210,40 @@ const getPayments = async (req, res) => {
   }
 };
 
-module.exports = { addPayments, getPayments };
+const updatePayments = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ticket_status } = req.body;
+
+    const roleValidator = req.users_id || null;
+    const getRole = await models.getRoles({ roleValidator });
+    const isAdmin = getRole[0]?.role;
+
+    const getAllData = await models.getPaymentsbyIds({ id });
+    console.log(getAllData);
+    if (getAllData.length == 0) {
+      throw { code: 400, message: "payments_id not identified" };
+    } else {
+      await models.updatePaymentsPartial({
+        ticket_status,
+        id,
+      });
+
+      res.json({
+        status: "true",
+        message: "data updated",
+        data: {
+          id,
+          ...req.body,
+        },
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(error.code || 500).json({
+      message: error.message || error,
+    });
+  }
+};
+
+module.exports = { addPayments, getPayments, updatePayments };

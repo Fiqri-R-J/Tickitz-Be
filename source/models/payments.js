@@ -76,6 +76,21 @@ const getAllPaymentsSort = async (params) => {
   } `;
 };
 
+const updatePaymentsPartial = async (params) => {
+  const { ticket_status, id } = params;
+
+  return await db`UPDATE payments
+  SET ticket_status = ${ticket_status},
+   updated_at = NOW() AT TIME ZONE 'Asia/Jakarta' 
+  WHERE payments_id = ${id} `;
+};
+
+const getPaymentsbyIds = async (params) => {
+  const { id } = params;
+
+  return await db`SELECT * FROM payments WHERE payments_id = ${id}`;
+};
+
 module.exports = {
   getRoles,
   getMoviesId,
@@ -87,4 +102,6 @@ module.exports = {
   getAllPaymentsPaginationSort,
   getAllPaymentsPagination,
   getAllPaymentsSort,
+  updatePaymentsPartial,
+  getPaymentsbyIds,
 };
